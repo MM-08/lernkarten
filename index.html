@@ -1,0 +1,2637 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lernkarten</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lernkarten">
+<meta name="description" content="Lernkarten für die Meisterprüfung – VDE, Netzwerktechnik, Betriebsführung">
+
+<!-- PWA Manifest (inline als Data-URL) -->
+<link rel="manifest" href="data:application/manifest+json,{
+  %22name%22:%22Lernkarten%22,
+  %22short_name%22:%22Lernkarten%22,
+  %22description%22:%22Lernkarten f%C3%BCr die Meisterpr%C3%BCfung%22,
+  %22start_url%22:%22.%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%230f0f0f%22,
+  %22theme_color%22:%22%230f0f0f%22,
+  %22orientation%22:%22portrait%22,
+  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230f0f0f'/%3E%3Crect x='80' y='120' width='352' height='272' rx='20' fill='%231a1a1a' stroke='%232e2e2e' stroke-width='2'/%3E%3Ctext x='256' y='290' font-family='Arial' font-size='160' font-weight='bold' fill='%23c8f135' text-anchor='middle'%3E✓%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any maskable%22}]
+}">
+
+<!-- Apple Touch Icon (inline SVG als Data-URL) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230f0f0f'/><rect x='80' y='120' width='352' height='272' rx='20' fill='%231a1a1a' stroke='%232e2e2e' stroke-width='2'/><text x='256' y='290' font-family='Arial' font-size='160' font-weight='bold' fill='%23c8f135' text-anchor='middle'>✓</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --muted: #666;
+    --accent: #c8f135;
+    --accent-dim: rgba(200,241,53,0.12);
+    --red: #ff5555;
+    --red-dim: rgba(255,85,85,0.12);
+    --green: #50fa7b;
+    --green-dim: rgba(80,250,123,0.12);
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  button, select, a { touch-action: manipulation; }
+  button { -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px));
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  header {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .mode-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .mode-btn {
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .category-row {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1rem;
+  }
+  .cat-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 5px 11px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 500; }
+
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 0.6rem;
+  }
+  .progress-track {
+    height: 2px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* --- CARD --- */
+  .card-wrap {
+    width: 100%;
+    max-width: 680px;
+    perspective: 1000px;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    touch-action: pan-y;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  /* Both faces: front is in flow (drives height), back is absolute overlay */
+  .card-face {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .card-front {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    /* In-flow: defines container height */
+    position: relative;
+    min-height: 140px;
+  }
+  .card-back {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    min-height: 100%;
+    transform: rotateY(180deg);
+  }
+  .card-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .card-q {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  .card-hint {
+    margin-top: 0.8rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .card-a {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .card-a ul { padding-left: 1.1rem; }
+  .card-a li { margin-bottom: 4px; }
+  .card-a .formula {
+    font-family: var(--mono);
+    background: rgba(200,241,53,0.08);
+    border: 1px solid rgba(200,241,53,0.2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin: 6px 0;
+    color: var(--accent);
+  }
+
+  /* --- BUTTONS --- fest am unteren Rand --- */
+  .btn-row {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 10px 16px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: linear-gradient(to top, #0f0f0f 60%, transparent);
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    margin: 0 auto;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 13px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-wrong {
+    background: rgba(255,85,85,0.18);
+    color: var(--red);
+    border: 1px solid rgba(255,85,85,0.4);
+  }
+  .btn-wrong:hover { background: rgba(255,85,85,0.28); }
+  .btn-right {
+    background: rgba(80,250,123,0.18);
+    color: var(--green);
+    border: 1px solid rgba(80,250,123,0.4);
+  }
+  .btn-right:hover { background: rgba(80,250,123,0.28); }
+  .btn-flip {
+    background: rgba(200,241,53,0.18);
+    color: var(--accent);
+    border: 1px solid rgba(200,241,53,0.4);
+  }
+  .btn-flip:hover { background: rgba(200,241,53,0.28); }
+  .btn-secondary {
+    background: rgba(26,26,26,0.85);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { color: var(--text); border-color: #444; }
+
+  .answer-btns {
+    display: none;
+    gap: 10px;
+    width: 100%;
+    max-width: 680px;
+    justify-content: center;
+    padding: 10px 16px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: linear-gradient(to top, #0f0f0f 60%, transparent);
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    margin: 0 auto;
+  }
+  .answer-btns.visible { display: flex; }
+
+  /* --- STATS --- */
+  .stats {
+    width: 100%;
+    max-width: 680px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 0.8rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.accent { color: var(--accent); }
+
+  /* --- DONE SCREEN --- */
+  .done-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 680px;
+    gap: 1rem;
+  }
+  .done-screen.visible { display: flex; }
+  .done-big { font-size: 64px; margin-bottom: 0.5rem; }
+  .done-title { font-size: 24px; font-weight: 600; }
+  .done-sub { color: var(--muted); font-size: 15px; }
+  .score-ring {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) calc(var(--pct) * 1%), var(--surface2) 0);
+    display: flex; align-items: center; justify-content: center;
+    margin: 1rem auto;
+    position: relative;
+  }
+  .score-ring::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .score-num {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-wrap { animation: slideIn 0.3s ease; }
+
+  /* Mobile optimizations */
+  @media (max-width: 480px) {
+    body { padding: 0.7rem 0.7rem; padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px)); }
+    header { margin-bottom: 0.8rem; }
+    .category-row { gap: 5px; margin-bottom: 0.7rem; }
+    .cat-btn { font-size: 9px; padding: 4px 9px; }
+    .stats { gap: 6px; margin-bottom: 0.6rem; }
+    .stat { padding: 8px 10px; }
+    .stat-val { font-size: 18px; }
+    .stat-label { font-size: 10px; }
+    .card-face { padding: 1rem 1.1rem; }
+    .card-q { font-size: 15px; }
+    .card-a { font-size: 13px; }
+    .btn { font-size: 13px; padding: 12px 16px; }
+    .btn-row, .answer-btns { gap: 8px; }
+  }
+
+  /* ── EDIT BUTTON & MODAL ── */
+  .edit-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .edit-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .edit-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .edit-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 16px;
+    padding: 10px 12px;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    display: block;
+    box-sizing: border-box;
+  }
+  textarea.edit-input { resize: vertical; }
+  .edit-input:focus { border-color: var(--accent); }
+  .edit-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 13px;
+    line-height: 1.65;
+    min-height: 60px;
+  }
+  .edit-preview ul { padding-left: 1.1rem; }
+  .edit-preview li { margin-bottom: 4px; }
+  .edit-preview .formula {
+    font-family: var(--mono);
+    background: rgba(200,241,53,0.08);
+    border: 1px solid rgba(200,241,53,0.2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin: 6px 0;
+    color: var(--accent);
+    display: block;
+  }
+
+  /* ── SWIPE HINT ── */
+  .swipe-hint {
+    display: none;
+    width: 100%;
+    max-width: 680px;
+    justify-content: center;
+    gap: 2rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.3rem;
+    animation: fadeIn 0.4s ease;
+  }
+  .swipe-hint.visible { display: flex; }
+  .swipe-hint span { display: flex; align-items: center; gap: 5px; }
+  .swipe-hint .wrong-hint { color: var(--red); opacity: 0.7; }
+  .swipe-hint .right-hint { color: var(--green); opacity: 0.7; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lernkarten</div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('all')">Alle</button>
+    <button class="mode-btn" onclick="setMode('wrong')">Falsch</button>
+    <button class="mode-btn" onclick="setMode('unseen')">Neu</button>
+  </div>
+</header>
+
+<!-- Quiz-Typ Toggle -->
+<div style="width:100%;max-width:680px;display:flex;gap:8px;margin-bottom:0.5rem;">
+  <button id="typeKarteBtn" onclick="setQuizType('karte')" style="flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:9px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#000;cursor:pointer;">🃏 Karteikarten</button>
+  <button id="typeMCBtn" onclick="setQuizType('mc')" style="flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:9px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">🔘 Multiple Choice</button>
+</div>
+<!-- Karten-Verwaltung -->
+<div style="width:100%;max-width:680px;display:flex;gap:6px;margin-bottom:0.8rem;">
+  <button onclick="openNewCard()" style="flex:1;font-family:var(--mono);font-size:11px;padding:7px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.05em;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">＋ Neu</button>
+  <button onclick="openImport()" style="flex:1;font-family:var(--mono);font-size:11px;padding:7px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.05em;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">⬇ Import</button>
+  <button onclick="exportHTML()" style="flex:1;font-family:var(--mono);font-size:11px;padding:7px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.05em;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">💾 Export</button>
+</div>
+
+<div class="category-row" id="catRow"></div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-val accent" id="statTotal">0</div><div class="stat-label">Gesamt</div></div>
+  <div class="stat"><div class="stat-val green" id="statRight">0</div><div class="stat-label">Richtig</div></div>
+  <div class="stat"><div class="stat-val red" id="statWrong">0</div><div class="stat-label">Falsch</div></div>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label"><span id="progressText">Karte 0 / 0</span><span id="progressPct">0%</span></div>
+</div>
+
+<div class="card-wrap" id="cardWrap" onclick="handleCardClick()">
+  <div class="card-inner" id="cardInner">
+    <div class="card-face card-front">
+      <div class="card-tag" id="cardCat">Kategorie</div>
+      <div class="card-q" id="cardQ">Lade Karten...</div>
+      <div class="card-hint" id="cardHint">↩ Klicken zum Umdrehen</div>
+      <button class="edit-btn" onclick="event.stopPropagation(); openEdit()" title="Karte bearbeiten">✎</button>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-tag">Antwort</div>
+      <div class="card-a" id="cardA"></div>
+    </div>
+  </div>
+</div>
+
+<div class="swipe-hint" id="swipeHint">
+  <span class="wrong-hint">← Falsch</span>
+  <span class="right-hint">Richtig →</span>
+</div>
+
+<!-- MC Options (only visible in MC mode) -->
+<div id="mcOptions" style="display:none;width:100%;max-width:680px;display:none;flex-direction:column;gap:8px;margin-bottom:0.8rem;"></div>
+
+<div class="btn-row" id="flipRow">
+  <button class="btn btn-flip" onclick="flipCard()">↩ Umdrehen</button>
+  <button class="btn btn-secondary" onclick="nextCard()">Überspringen →</button>
+</div>
+
+<div class="answer-btns" id="answerRow">
+  <button class="btn btn-wrong" onclick="answer(false)">✗ &nbsp;Falsch</button>
+  <button class="btn btn-right" onclick="answer(true)">✓ &nbsp;Richtig</button>
+</div>
+
+<div class="done-screen" id="doneScreen">
+  <div class="done-big">🎉</div>
+  <div class="done-title">Runde abgeschlossen!</div>
+  <div id="scoreRingWrap"></div>
+  <div class="done-sub" id="doneSub"></div>
+  <div style="display:flex;gap:12px;margin-top:1rem;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-flip" onclick="restart(false)">↺ &nbsp;Nochmal (alle)</button>
+    <button class="btn btn-wrong" onclick="restart(true)">↺ &nbsp;Nur Falsche</button>
+  </div>
+</div>
+
+<script>
+// @@CARDS_START
+const ALL_CARDS = [
+  // SCHUTZKLASSEN
+  { cat: "Schutzmaßnahmen", mc: [
+    "SK I = Doppelte Isolierung, SK II = Schutzleiter (Erdung), SK III = Schutztrennung",
+    "SK I = Schutztrennung, SK II = Schutzkleinspannung SELV, SK III = Schutzleiter",
+    "SK I = Schutzkleinspannung PELV, SK II = Erdung über PEN-Leiter, SK III = Doppelte Isolierung"
+  ], q: "Was sind die drei Schutzklassen (SK) und womit schützen sie?", a: "<ul><li><strong>SK I</strong> – Schutzleiter (Erdung)</li><li><strong>SK II</strong> – Doppelte oder verstärkte Isolierung (kein PE nötig)</li><li><strong>SK III</strong> – Schutzkleinspannung SELV / PELV</li></ul>" },
+  { cat: "Schutzmaßnahmen", mc: [
+    "Basisschutz erforderlich ab U > 50 V AC; in feuchten Räumen ab U > 25 V AC",
+    "Basisschutz erforderlich ab U > 12 V AC; in feuchten Räumen ab U > 6 V AC",
+    "Basisschutz immer erforderlich – keine spannungsabhängige Ausnahme bei AC"
+  ], q: "Ab welcher Spannung ist Basisschutz bei AC erforderlich?", a: "<ul><li>U &gt; 25 V AC → Basisschutz erforderlich</li><li>U &lt; 25 V AC → ohne Basisschutz zulässig</li><li>In feuchten Räumen: Grenze bei 12 V AC</li></ul>" },
+  { cat: "Schutzmaßnahmen", mc: [
+    "Basisschutz bei DC erforderlich ab U > 120 V; unter 120 V DC immer zulässig",
+    "Basisschutz bei DC erforderlich ab U > 30 V; unter 30 V DC immer ohne Schutz",
+    "Basisschutz bei DC immer erforderlich – keine Ausnahme für Kleinspannung"
+  ], q: "Ab welcher Spannung ist Basisschutz bei DC erforderlich?", a: "<ul><li>U &gt; 60 V DC → Basisschutz erforderlich</li><li>U &lt; 60 V DC → ohne Basisschutz zulässig</li><li>U &lt; 30 V DC → ebenfalls zulässig</li></ul>" },
+  { cat: "Schutzmaßnahmen", mc: [
+    "RCD mit I_ΔN ≤ 100 mA – Pflicht nur in Badezimmern und Feuchträumen",
+    "RCD mit I_ΔN ≤ 30 mA – Pflicht nur für Steckdosen im Außenbereich und auf Baustellen",
+    "RCD mit I_ΔN ≤ 10 mA – Pflicht für alle Steckdosen in gewerblichen Anlagen"
+  ], q: "Was ist der zusätzliche Schutz und wann ist er Pflicht?", a: "<ul><li>RCD (FI-Schalter) mit I<sub>ΔN</sub> ≤ 30 mA</li><li>Pflicht für laienzugängliche Steckdosen bis 32 A</li><li>In Wohngebäuden, Badezimmern</li></ul>" },
+  { cat: "Schutzmaßnahmen", mc: [
+    "U < 500 V, mehrere Verbraucher erlaubt, l_max < 100 m",
+    "U < 230 V, nur ein Verbraucher, l_max < 500 m",
+    "U < 1000 V, beliebig viele Verbraucher, keine Längenbegrenzung"
+  ], q: "Was sind die Bedingungen für Schutztrennung mit einem Verbraucher?", a: "<ul><li>U &lt; 500 V</li><li>Nur ein Verbraucher angeschlossen</li><li>Bei mehreren: l<sub>max</sub> &lt; 500 m, U &lt; 500 V</li></ul>" },
+  { cat: "Schutzmaßnahmen", mc: [
+    "Trockener Raum: IP 1X / IP 2X. Feuchter Raum: IP X2 / IP X4. Nasser Raum: IP X5",
+    "Trockener Raum: IP 4X / IP 5X. Feuchter Raum: IP X4 / IP X5. Nasser Raum: IP X7",
+    "Trockener Raum: IP 0X / IP 1X. Feuchter Raum: IP X0 / IP X1. Nasser Raum: IP X2"
+  ], q: "Welche IP-Schutzgrade gelten für trockene und feuchte Räume?", a: `<ul>
+    <li>Trockener Raum: V = IP 2X, H = IP 4X</li>
+    <li>Feuchter Raum: V = IP X1, H = IP X4</li>
+    <li>Nasser Raum: IP X4</li>
+    <li>Außenbereich (geschützt): IP X1</li>
+  </ul>` },
+  { cat: "Schutzmaßnahmen", mc: [
+    "Endstromkreise ≤ 32 A: t ≤ 0,2 s. Steckdosen ≤ 63 A: t ≤ 0,4 s. Verteilerstromkreise: t ≤ 10 s",
+    "Endstromkreise ≤ 32 A: t ≤ 5 s. Alle anderen Stromkreise: t ≤ 0,4 s",
+    "Endstromkreise: t ≤ 1 s. Verteilerstromkreise: t ≤ 3 s. Steckdosen: t ≤ 0,5 s"
+  ], q: "Was sind die Abschaltzeiten im Fehlerfall (TN-System)?", a: `<ul>
+    <li>Endstromkreise ≤ 32 A: t ≤ 0,4 s</li>
+    <li>Steckdosen ≤ 63 A: t ≤ 0,2 s (TT)</li>
+    <li>Verteilerstromkreise &gt; 32 A: t ≤ 5 s</li>
+  </ul>` },
+  { cat: "Schutzmaßnahmen", mc: [
+    "SELV = geerdet, galvanisch getrennt. PELV = nicht geerdet, galvanisch getrennt. FELV = galvanisch getrennt, Schutzfunktion vorhanden",
+    "SELV = galvanisch getrennt, nicht geerdet. PELV = nicht galvanisch getrennt. FELV = galvanisch getrennt, mit Schutzfunktion",
+    "SELV = galvanisch verbunden, nicht geerdet. PELV = galvanisch getrennt, nicht geerdet. FELV = galvanisch getrennt, geerdet"
+  ], q: "Was ist der Unterschied zwischen SELV und PELV?", a: `<ul>
+    <li><strong>SELV</strong> – Safety Extra Low Voltage: galvanisch getrennt vom Netz, nicht geerdet</li>
+    <li><strong>PELV</strong> – Protective Extra Low Voltage: galvanisch getrennt, aber geerdet</li>
+    <li><strong>FELV</strong> – Functional Extra Low Voltage: keine Schutzfunktion</li>
+  </ul>` },
+
+  // BERECHNUNGEN
+  { cat: "Berechnungen", mc: ["A = (l · I_B · cos φ) / (k · U_v) – einfacher Faktor statt 2","A = (2 · l · I_B) / (k · U_v · cos φ) – cos φ im Nenner","A = (√3 · l · I_B · cos φ) / (k · U_v) – Drehstromformel"], q: "Wie lautet die Formel für den Querschnitt im Wechselstromkreis (Spannungsfall)?", a: `<div class="formula">A = (2 · l · I<sub>B</sub> · cos φ) / (k · U<sub>v</sub>)</div><ul><li>l = Leitungslänge in m</li><li>k = Leitfähigkeit (Cu = 56)</li><li>U<sub>v</sub> = ε · U<sub>N</sub></li></ul>` },
+  { cat: "Berechnungen", mc: ["A = (2 · l · I_B · cos φ) / (k · U_v) – Wechselstromformel mit Faktor 2","A = (3 · l · I_B · cos φ) / (k · U_v) – Faktor 3 statt √3","A = (√3 · l · I_B) / (k · U_v · cos φ) – cos φ im Nenner"], q: "Wie lautet die Formel für den Querschnitt im Drehstromkreis?", a: `<div class="formula">A = (√3 · l · I<sub>B</sub> · cos φ) / (k · U<sub>v</sub>)</div><ul><li>cos φ (ohmsch) = 1</li><li>cos φ (induktiv) = 0,8</li><li>cos φ (unbelastet) = 0,9</li></ul>` },
+  { cat: "Berechnungen", mc: ["DIN 18015-1: max. 4% Wohngebäude, DIN VDE 0100-520: max. 3% Gewerbe, NAV/TAB: max. 1%","DIN 18015-1: max. 3% Wohngebäude, DIN VDE 0100-520: max. 3% Gewerbe, NAV/TAB: max. 1%","DIN 18015-1: max. 5% Wohngebäude, DIN VDE 0100-520: max. 4% Gewerbe, NAV/TAB: max. 2%"], q: "Welche Spannungsfall-Grenzen gelten nach DIN?", a: `<ul>
+    <li>DIN 18015-1: max. 3% → Wohngebäude</li>
+    <li>DIN VDE 0100-520: max. 4% → Gewerbe</li>
+    <li>NAV/TAB: max. 0,5% → Vorzählerbereich (HAK)</li>
+  </ul>` },
+  { cat: "Berechnungen", mc: ["I_B ≤ I_N ≤ I_z und I_z = I_r / (f_H · f_e) – Division statt Multiplikation","I_N ≤ I_B ≤ I_z – Reihenfolge vertauscht, I_z = I_r · f_H · f_e","I_B ≤ I_z ≤ I_N – andere Reihenfolge, Verzicht immer möglich"], q: "Was ist die Bedingung für den Überlastschutz?", a: `<div class="formula">I<sub>B</sub> ≤ I<sub>N</sub> ≤ I<sub>z</sub></div><div class="formula">I<sub>z</sub> = I<sub>r</sub> · f<sub>H</sub> · f<sub>e</sub></div><p>Verzicht möglich bei leitungsgebundenen Wärmeverbrauchern</p>` },
+  { cat: "Berechnungen", mc: ["I_fiktiv = I_B · f_H · f_e – Multiplikation statt Division","I_fiktiv = I_r / (f_H · f_e) – I_r statt I_B im Zähler","I_fiktiv = I_B / f_H – nur ein Korrekturfaktor"], q: "Wie berechnet sich der fiktive Strom zur Strombelastbarkeit?", a: `<div class="formula">I<sub>fiktiv</sub> = I<sub>B</sub> / (f<sub>H</sub> · f<sub>e</sub>)</div><p>Bedingung: I<sub>fiktiv</sub> &lt; I<sub>r</sub></p><p>Faktoren: Verlegeart, Häufung, Temperatur</p>` },
+  { cat: "Berechnungen", mc: ["l_max > l und R_Netz in kΩ. Verzicht möglich wenn LSS Typ B verbaut","l_max < l – Maxlänge muss kürzer sein als tatsächliche Länge. R_Netz in Ω","l_max = l – Längen müssen gleich sein. R_Netz in mΩ. Kein Verzicht möglich"], q: "Was gilt beim Kurzschlussschutz nach DIN VDE 0100-430?", a: `<ul><li>l<sub>max</sub> &gt; l (tatsächliche Länge)</li><li>R<sub>Netz</sub> wird in mΩ angegeben</li><li>Verzicht auf Schutzmaßnahme möglich wenn RCD vorhanden</li></ul>` },
+
+  // BADEZIMMER
+  { cat: "Badezimmer", mc: [
+    "Bereich 0 = direkt über der Wanne bis 2,25 m. Bereich 1 = 60 cm seitlich. Bereich 2 = außerhalb Bereich 1",
+    "Bereich 0 = 60 cm seitlich der Wanne. Bereich 1 = über der Wanne bis 2,25 m. Bereich 2 = Innenraum Wanne",
+    "Bereich 0 = gesamter Nassbereich bis 1 m Höhe. Bereich 1 = bis 2,25 m Höhe. Bereich 2 = restlicher Raum"
+  ], q: "Welche Bereiche gibt es im Badezimmer und was bedeuten sie?", a: `<ul>
+    <li><strong>Bereich 0</strong> – Innenraum Wanne/Dusche</li>
+    <li><strong>Bereich 1</strong> – Direkt über/um Wanne, bis 2,25 m Höhe</li>
+    <li><strong>Bereich 2</strong> – 60 cm außerhalb (seitlich)</li>
+  </ul>` },
+  { cat: "Badezimmer", mc: [
+    "Bereich 0: max. 25 V. Bereich 1: max. 12 V. Bereich 2: Schutztrennung oder RCD 30 mA",
+    "Bereich 0: max. 50 V. Bereich 1: max. 25 V. Bereich 2: max. 230 V mit RCD",
+    "Bereich 0: max. 6 V. Bereich 1: max. 12 V. Bereich 2: max. 25 V – überall nur SELV"
+  ], q: "Welche Spannungsgrenzen gelten in den Badezimmerbereichen?", a: `<ul>
+    <li>Bereich 0: max. 12 V (Basisschutz)</li>
+    <li>Bereich 1: max. 25 V (Basisschutz)</li>
+    <li>Bereich 2: Schutztrennung</li>
+  </ul>` },
+  { cat: "Badezimmer", mc: [
+    "RCD Pflicht mit I_ΔN < 100 mA. Alle Betriebsmittel müssen IP 44 haben. Einteilung in warm/kalt/nass",
+    "RCD Pflicht mit I_ΔN < 10 mA. Nur SELV-Geräte erlaubt. Keine Steckdosen im gesamten Bad",
+    "RCD Pflicht mit I_ΔN < 30 mA. Nur Hersteller-zugelassene Geräte einbauen. Einteilung trocken/feucht/nass"
+  ], q: "Was sind die Pflichten beim Badezimmer nach DIN VDE?", a: `<ul>
+    <li>RCD Pflicht: I<sub>ΔN</sub> &lt; 30 mA</li>
+    <li>Nur Betriebsmittel einbauen, die vom Hersteller für den Bereich zugelassen sind</li>
+    <li>Einteilung in trocken / feucht / nass</li>
+  </ul>` },
+  { cat: "Badezimmer", mc: [
+    "Breite: 90 cm neben der Wanne. Höhe: 2,25 m ab Wannenrand. Tiefe (Bereich 2): 30 cm",
+    "Breite: 60 cm neben der Wanne. Höhe: 3,0 m ab Boden. Tiefe (Bereich 2): 60 cm außerhalb",
+    "Breite: 30 cm neben der Wanne. Höhe: 1,80 m ab Boden. Tiefe (Bereich 2): 90 cm außerhalb"
+  ], q: "Welche Abmessungen hat Bereich 1 beim Badezimmer?", a: `<ul>
+    <li>Breite: 60 cm neben der Wanne/Dusche</li>
+    <li>Höhe: 2,25 m ab Boden</li>
+    <li>Tiefe (Bereich 2): 60 cm außerhalb</li>
+  </ul>` },
+
+  // BAUSTELLEN
+  { cat: "Baustellen", mc: [
+    "I_N ≤ 32 A → RCD 30 mA. I_N > 32 A → RCD 100 mA (Kransteckdose). Frequenzgesteuerte Geräte → Typ A",
+    "I_N ≤ 16 A → RCD 30 mA. I_N > 16 A → RCD 300 mA. Frequenzgesteuerte Geräte → Typ AC",
+    "Alle Steckdosen → RCD 30 mA unabhängig vom Strom. Kransteckdosen → RCD 100 mA. Typ A überall"
+  ], q: "Welcher RCD-Typ ist auf Baustellen für Steckdosen bis 32 A vorgeschrieben?", a: `<ul>
+    <li>I<sub>N</sub> ≤ 32 A → RCD 32 mA</li>
+    <li>I<sub>N</sub> &gt; 32 A → RCD 500 mA (Kransteckdose)</li>
+    <li>Frequenzgesteuerte Geräte → Typ B / B+</li>
+  </ul>` },
+  { cat: "Baustellen", mc: [
+    "Feste Verlegung: NYCWY (Starkstromkabel). Bewegliche Leitungen: H05RN-F",
+    "Feste Verlegung: NYM-J (Mantelleitung). Bewegliche Leitungen: H07RN-F",
+    "Feste Verlegung: NYY (Erdkabel). Bewegliche Leitungen: NYM-J (Mantelleitung)"
+  ], q: "Welche Leitungstypen sind auf Baustellen vorgeschrieben?", a: `<ul>
+    <li>Feste Verlegung: NYY (Erdkabel)</li>
+    <li>Bewegliche Leitungen: H07RN-F</li>
+    <li>Verlege- und Gehwege: hochhängen oder abdecken</li>
+  </ul>` },
+  { cat: "Baustellen", mc: [
+    "Allgemein: mind. IP 44, NYY. Bodenleuchten: min. IP 23. Handleuchten: SK I, IP 23, H07RN-F",
+    "Allgemein: mind. IP 55, H05RN-F. Bodenleuchten: min. IP 23. Handleuchten: SK II, IP 44",
+    "Allgemein: mind. IP 65, H07RN-F. Bodenleuchten: min. IP 44. Handleuchten: SK III, IP 55"
+  ], q: "Was sind die Mindestanforderungen für Baustellenbeleuchtung?", a: `<ul>
+    <li>Allgemein: mind. IP 23, H07RN-F</li>
+    <li>Bodenleuchten: min. IP 55</li>
+    <li>Handleuchten: SK II, IP 55, Schutzkorb, H05RN-F (max. 5 m)</li>
+  </ul>` },
+  { cat: "Baustellen", mc: [
+    "1× wöchentlich: Prüfknopf. 1× im Quartal: vollständige Anlagenprüfung",
+    "1× täglich: Sichtprüfung der Leitungen. 1× im Jahr: vollständige Anlagenprüfung",
+    "1× pro Schicht: Prüfknopf. 1× im Halbjahr: vollständige Anlagenprüfung"
+  ], q: "Wie oft müssen Anlagen auf Baustellen geprüft werden (DGUV-V3)?", a: `<ul>
+    <li>1× täglich: Prüfknopf betätigen</li>
+    <li>1× im Monat: vollständige Anlagenprüfung</li>
+  </ul>` },
+
+  // BLITZSCHUTZ
+  { cat: "Blitzschutz", mc: [
+    "LPZ 0A = Teilblitzstrom innen, LPZ 0B = voller Blitzstrom außen, LPZ 1 = direkte Einschläge",
+    "LPZ 0A = keine Einschläge Teilblitzstrom, LPZ 0B = direkte Einschläge voller Strom, LPZ 1 = induktive Ströme",
+    "LPZ 0A = Innenbereich geschützt, LPZ 0B = Außenbereich geschützt, LPZ 1 = Übergangszone"
+  ], q: "Was sind die Blitzschutzzonen (LPZ) und was bedeuten sie?", a: `<ul>
+    <li><strong>LPZ 0A</strong> – Direkte Einschläge, voller Blitzstrom</li>
+    <li><strong>LPZ 0B</strong> – Keine direkten Einschläge, Teilblitzstrom</li>
+    <li><strong>LPZ 1</strong> – Keine direkten Einschläge, Teilblitzstrom (innen)</li>
+    <li><strong>LPZ n</strong> – Indizierte Ströme, galvanische Kopplung</li>
+  </ul>` },
+  { cat: "Blitzschutz", mc: [
+    "Typ 1 wenn: Gebäude höher als 20 m oder mehr als 3 Stockwerke hat",
+    "Typ 1 wenn: Unterverteilung vorhanden oder Endstromkreise > 32 A",
+    "Typ 1 wenn: Freileitungsanschluss vorhanden oder innere Blitzschutzanlage fehlt"
+  ], q: "Wann ist ein Überspannungsschutz Typ 1 vorgeschrieben?", a: `<ul>
+    <li>Wenn eine äußere Blitzschutzanlage am Gebäude vorhanden ist</li>
+    <li>Bei Freileitungsanschluss</li>
+    <li>Einsatzort: Hauptverteiler / HAK-nah</li>
+  </ul>` },
+  { cat: "Blitzschutz", mc: [
+    "Typenreihenfolge korrekt, aber Anschlussleitungen zu kurz. PA/PE korrekt angeschlossen",
+    "Falsche Schaltungsart (3+0 statt 4+0), zu kurze Leitungen, fehlender Querschnitt",
+    "Nur ein typischer Fehler: Rödeldraht statt Pressverbinder bei der Erdungsverbindung"
+  ], q: "Was sind häufige Montagefehler bei Überspannungsschutzgeräten (ÜSS)?", a: `<ul>
+    <li>Typenreihenfolge falsch</li>
+    <li>Falsche Schaltungsart (3+0 vs. 4+0)</li>
+    <li>Anschlussleitungen zu lang</li>
+    <li>PA/PE-Anschluss fehlt</li>
+    <li>Falscher Querschnitt</li>
+    <li>Blitzstromführende Leitungen mit anderen zusammen verlegt</li>
+  </ul>` },
+  { cat: "Blitzschutz", mc: [
+    "Brand, Überspannung durch kapazitive Kopplung, Potenzialabsenkung im Erdsystem",
+    "Nur Sachschäden: Brand und Gebäudeschäden – keine Personengefährdung bei modernen Anlagen",
+    "Kurzschluss im Netz, Netzausfall, Überlast durch induzierten Strom im Erdsystem"
+  ], q: "Was sind mögliche Folgen eines Blitzschlags?", a: `<ul>
+    <li>Brand</li>
+    <li>Personengefährdung</li>
+    <li>Potenzialanhebung im Erdsystem</li>
+    <li>Überspannung durch induktive Einkopplung</li>
+  </ul>` },
+  { cat: "Blitzschutz", mc: [
+    "Typ 1 = Unterverteilung/Endstromkreis nach Blitzschutzanlage. Typ 2 = Hauptverteiler/HAK",
+    "Typ 1 und Typ 2 sind identisch – nur Nennstrom und Einbauort unterscheiden sich",
+    "Typ 1 = überall einsetzbar wo Überspannung möglich. Typ 2 = nur bei Freileitungsanschluss"
+  ], q: "Was ist der Unterschied zwischen ÜSS Typ 1 und Typ 2?", a: `<ul>
+    <li><strong>Typ 1</strong> – Hauptverteiler/HAK; bei Blitzschutzanlage oder Freileitungsanschluss</li>
+    <li><strong>Typ 2</strong> – Unterverteilung/Endstromkreis; Standardschutz für alle Gebäude nach Typ 1</li>
+    <li>Typ 2 schützt vor Schaltüberspannungen und induzierten Überspannungen</li>
+  </ul>` },
+  { cat: "Blitzschutz", mc: [
+    "SK III → 6 cm/m. Beispiel: 10 m Ableiter = 60 cm. Typ 1 max. 1 m Anschlusslänge",
+    "SK III → 2 cm/m. Beispiel: 10 m Ableiter = 20 cm. Typ 1 max. 0,3 m Anschlusslänge",
+    "SK I → 4 cm/m. Beispiel: 10 m Ableiter = 40 cm Abstand. Nur für äußeren Blitzschutz"
+  ], q: "Welcher Trennabstand gilt für SK III beim Blitzschutz?", a: `<ul>
+    <li>SK III → 4 cm/m</li>
+    <li>Beispiel: 10 m Ableiter = 40 cm Mindestabstand</li>
+    <li>Blitzstromableiter Typ 1: max. 0,5 m Anschlussleitung (ca. 1 kV/m)</li>
+  </ul>` },
+
+  // ERDUNG
+  { cat: "Erdungsanlagen", mc: [
+    "Natürlicher Erder, Oberflächenerder, Tiefenerder, Ringerder",
+    "Fundamenterder, Tiefenerder, Banderder, Strahlerder",
+    "Schutzleiter, Fundamenterder, Oberflächenerder, Potenzialausgleichsleiter"
+  ], q: "Was sind die vier Arten von Erdern?", a: `<ul>
+    <li><strong>Natürlicher Erder</strong> – Gebäude-/Fundamentteile mit Erdkontakt</li>
+    <li><strong>Oberflächenerder</strong> – Strahlen-, Ring-, Maschenerde (0,5–1 m tief)</li>
+    <li><strong>Tiefenerder</strong> – Rund-/Profilstahl senkrecht eingebracht</li>
+    <li><strong>Fundamenterder</strong> – Stahl im Betonfundament eingebettet</li>
+  </ul>` },
+  { cat: "Erdungsanlagen", mc: [
+    "Verbindungen mit Rödeldraht erlaubt. Ringerder Abstand 2 m von Gebäudekante. Maschenweite max. 10×10 m",
+    "Nur Schweißverbinder zulässig. Ringerder direkt an Gebäudekante. Maschenweite max. 50×50 m",
+    "Verbindungen: Schweißen, Klemmen, Schrauben oder Pressen. Ringerder ca. 1 m von Kante. Maschenweite max. 20×20 m – aber Rödeldraht verboten"
+  ], q: "Was sind die Regeln für den Fundamenterder ohne Blitzschutz?", a: `<ul>
+    <li>Verbindungen: Schweiß-, Klemm-, Schraub- oder Pressverbinder</li>
+    <li>Kein Rödeldraht!</li>
+    <li>Ringerder als geschlossener Ring, ca. 1 m von der Gebäudekante</li>
+    <li>Maschenweite max. 20 × 20 m</li>
+  </ul>` },
+  { cat: "Erdungsanlagen", mc: [
+    "0,2–0,5 m Tiefe. Material: Kupferseil oder Aluminiumrohr. Typen: Strahlen-, Punkt-, Banderder",
+    "1–2 m Tiefe (unter Frostgrenze). Material: Rund- oder Bandmaterial. Typen: Strahlen-, Ring-, Maschenerde",
+    "Direkt an der Oberfläche (0–10 cm). Material: verzinkter Stahl. Typen: Ringerder und Tiefenerder"
+  ], q: "In welcher Tiefe wird ein Oberflächenerder verlegt?", a: `<ul>
+    <li>0,5–1 m Tiefe (je nach örtlicher Frostgrenze)</li>
+    <li>Material: Rund- oder Bandmaterial</li>
+    <li>Typen: Strahlen-, Ring-, Maschenerde</li>
+  </ul>` },
+
+  // BETRIEBSFÜHRUNG – Auftragsabwicklung (MC + Karteikarten)
+{ cat: "Betriebsführung", mc: [
+  "Kundenanfrage → Auftragserteilung → Angebot → Arbeitsvorbereitung → Materialbeschaffung → Ausführung → Abnahme → Rechnung",
+  "Angebot → Kundenanfrage → Auftragserteilung → Arbeitsvorbereitung → Ausführung → Materialbeschaffung → Abnahme → Rechnung",
+  "Kundenanfrage → Angebot → Arbeitsvorbereitung → Auftragserteilung → Materialbeschaffung → Ausführung → Rechnung → Abnahme"
+], q: "In welcher Reihenfolge laufen die 8 Schritte der Auftragsabwicklung ab?", a: `<ul>
+  <li><strong>1.</strong> Kundenanfrage</li>
+  <li><strong>2.</strong> Angebot erstellen</li>
+  <li><strong>3.</strong> Auftragserteilung / Vertragsabschluss</li>
+  <li><strong>4.</strong> Arbeitsvorbereitung / Planung</li>
+  <li><strong>5.</strong> Materialbeschaffung</li>
+  <li><strong>6.</strong> Auftragsausführung</li>
+  <li><strong>7.</strong> Abnahme / Qualitätskontrolle</li>
+  <li><strong>8.</strong> Rechnungsstellung</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Die Anfrage ist rechtlich bindend, sobald der Betrieb antwortet.",
+  "Der Vertrag kommt erst mit Beginn der Ausführungsarbeiten zustande.",
+  "Die Auftragserteilung ist nur bei schriftlichen Angeboten wirksam."
+], q: "Was unterscheidet eine Kundenanfrage rechtlich von einer Auftragserteilung?", a: `<ul>
+  <li>Die <strong>Anfrage</strong> ist unverbindlich.</li>
+  <li>Der <strong>Vertrag</strong> kommt erst mit der Auftragserteilung zustande, wenn der Kunde das Angebot annimmt.</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Weil Lieferanten eine abgeschlossene Arbeitsvorbereitung als Nachweis verlangen.",
+  "Weil die Materialbeschaffung gesetzlich erst nach Vertragsabschluss erlaubt ist.",
+  "Weil sonst keine Preisvergleiche zwischen Lieferanten möglich sind."
+], q: "Warum muss die Arbeitsvorbereitung vor der Materialbeschaffung stattfinden?", a: `<ul>
+  <li>Erst in der Planung wird festgelegt, welche Materialien in welcher Menge und zu welchem Zeitpunkt benötigt werden.</li>
+  <li>Ohne diese Planung kann nicht zielgerichtet bestellt werden.</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Die Abnahme beendet automatisch alle Gewährleistungsansprüche des Kunden.",
+  "Mit der Abnahme erlischt die Haftung des Betriebs vollständig.",
+  "Die Abnahme ersetzt die Rechnung, wenn der Kunde keine Mängel meldet."
+], q: "Welche zwei rechtlichen Folgen hat die Abnahme?", a: `<ul>
+  <li>Die <strong>Gefahr geht auf den Kunden über</strong>.</li>
+  <li>Die <strong>Gewährleistungsfrist beginnt</strong> zu laufen.</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Weil das Finanzamt die Rechnung sonst nicht als Betriebsausgabe anerkennt.",
+  "Weil der Kunde sonst das Recht hat, den Vertrag zu kündigen.",
+  "Weil die Mehrwertsteuer erst nach Abnahme berechnet werden darf."
+], q: "Warum darf die Schlussrechnung erst nach der Abnahme gestellt werden?", a: `<ul>
+  <li>Weil die Leistung erst mit der Abnahme als vollständig erbracht gilt.</li>
+  <li>Erst dann entsteht der vollständige Zahlungsanspruch.</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Der Betrieb kann sofort die Rechnung stellen und die Mängel später beheben.",
+  "Der Kunde verliert seinen Anspruch auf Nachbesserung, wenn er trotzdem unterschreibt.",
+  "Mängel bei der Abnahme führen automatisch zur Vertragsauflösung."
+], q: "Was passiert, wenn bei der Abnahme Mängel festgestellt werden?", a: `<ul>
+  <li>Der Betrieb ist zur <strong>Nachbesserung verpflichtet</strong>.</li>
+  <li>Die Abnahme gilt erst nach erfolgreicher Mängelbeseitigung als abgeschlossen.</li>
+</ul>` },
+{ cat: "Betriebsführung", mc: [
+  "Auftragsgewinnung → Auftragsnachbereitung → Auftragsdurchführung",
+  "Angebotserstellung → Auftragsausführung → Rechnungsstellung",
+  "Planung → Durchführung → Abnahme"
+], q: "In welche 3 Phasen lässt sich die Auftragsabwicklung grob einteilen?", a: `<ul>
+  <li><strong>1.</strong> Auftragsgewinnung</li>
+  <li><strong>2.</strong> Auftragsdurchführung</li>
+  <li><strong>3.</strong> Auftragsnachbereitung</li>
+</ul>` },
+
+  // EMV
+  { cat: "EMV", q: "Was sind die drei Grundelemente der EMV?", a: `<ul>
+    <li><strong>Störquelle</strong> – erzeugt elektromagnetische Störungen (z.B. Netzteil, Motor)</li>
+    <li><strong>Störsenke</strong> – wird durch Störung beeinflusst (z.B. Steuerung, Computer)</li>
+    <li><strong>Kopplung</strong> – Übertragungsweg der Störung</li>
+  </ul>` },
+  { cat: "EMV", q: "Welche Kopplungsarten gibt es bei der EMV?", a: `<ul>
+    <li>Leitungsgebunden (über Kabel, Stromnetz)</li>
+    <li>Kapazitiv (elektrisches Feld)</li>
+    <li>Induktiv (magnetisches Feld)</li>
+    <li>Strahlung (elektromagnetische Wellen durch die Luft)</li>
+  </ul>` },
+  { cat: "EMV", q: "Was sind typische künstliche EMV-Störquellen?", a: `<ul>
+    <li>Schaltnetzteile (PC, LED-Leuchten, Ladegeräte)</li>
+    <li>Elektromotoren (Waschmaschinen etc.)</li>
+    <li>Frequenzumrichter</li>
+    <li>Defekte Geräte</li>
+    <li>Sender (Jammer, Störsender)</li>
+  </ul>` },
+  { cat: "EMV", q: "Welche Maßnahmen helfen gegen EMV-Störungen?", a: `<ul>
+    <li>Abstand zu Leitungen vergrößern</li>
+    <li>Orthogonale Verlegung (rechtwinklig kreuzen)</li>
+    <li>Verdrillen (Twisted Pair)</li>
+    <li>Trennsteg verwenden</li>
+    <li>Verlegung in Metallrohre/-kanäle/-schächte</li>
+    <li>Leitungsschleifen vermeiden</li>
+  </ul>` },
+  { cat: "EMV", q: "Warum erzeugen Schaltnetzteile EMV-Probleme?", a: `<ul>
+    <li>Durch schnelles Ein-/Ausschalten entstehen nicht-sinusförmige Ströme</li>
+    <li>Diese speisen Oberwellen ins Netz ein</li>
+    <li>Folge: Flackern, Fehlfunktionen, schlechtere Spannungsqualität</li>
+  </ul>` },
+  { cat: "EMV", q: "Was ist EMV-gerechte Leitungsverlegung?", a: `<ul>
+    <li>Verlegung in geschirmte Bereiche (Metallrohre, -kanäle, Schächte)</li>
+    <li>Auf metallene/leitfähige Kabelkonstruktionen (Rinnen, Wannen)</li>
+    <li>Leitungsschleifen vermeiden (keine stillen Reserven)</li>
+  </ul>` },
+
+  // GLASFASERSTRECKE
+  { cat: "Glasfaser", q: "Wie berechnet sich die Gesamtdämpfung einer Glasfaserstrecke? (Beispiel: 4,8 km, 0,8 dB/km, 6× Stecker à 0,7 dB, 10× Spleiß à 0,2 dB)", a: `<ul>
+    <li>Leitungsdämpfung: 4,8 km × 0,8 dB/km = <strong>3,84 dB</strong></li>
+    <li>Steckverbindungen: 6 × 0,7 dB = <strong>4,2 dB</strong></li>
+    <li>Spleiße: 10 × 0,2 dB = <strong>2,0 dB</strong></li>
+    <li>Gesamtdämpfung: 3,84 + 4,2 + 2,0 = <strong>10,04 dB</strong></li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Wie berechnet sich das verfügbare Leistungsbudget eines Übertragungssystems? (Sendeleistung −6 dBm, Empfangsleistung −18 dBm, Systemreserve 3 dB)", a: `<ul>
+    <li>Leistungsbudget = Sendeleistung − min. Empfangsleistung</li>
+    <div class="formula">P<sub>Budget</sub> = −6 dBm − (−18 dBm) = 12 dB</div>
+    <li>Nutzbare Reserve = Budget − Systemreserve = 12 − 3 = <strong>9 dB</strong></li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Kann die Glasfaserstrecke (Gesamtdämpfung 10,04 dB, nutzbares Budget 9 dB) betrieben werden?", a: `<ul>
+    <li>Gesamtdämpfung: 10,04 dB</li>
+    <li>Nutzbares Budget: 9 dB</li>
+    <li>Fehlbetrag: 10,04 − 9 = <strong>ca. 1 dB</strong></li>
+    <li>→ Strecke ist <strong>nicht ausreichend</strong> – sie kann so nicht betrieben werden</li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Warum nimmt die Dämpfung bei Steckverbindungen mit steigender Kabellänge zu?", a: `<ul>
+    <li>Steckverbindungen haben eine feste Dämpfung pro Stück (z.B. 0,7 dB)</li>
+    <li>Längere Strecken erfordern mehr Steckverbindungen (mehr Segmente, mehr Verteiler)</li>
+    <li>Jede Verbindung addiert Verluste durch Fehljustierung, Verschmutzung, Spaltmaße</li>
+    <li>Spleiße (0,2 dB) sind deutlich verlustarmer als Stecker (0,7 dB)</li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Welche Maßnahmen kann man ergreifen, wenn das Leistungsbudget einer Glasfaserstrecke nicht ausreicht?", a: `<ul>
+    <li>Steckverbindungen durch Spleiße ersetzen (weniger Dämpfung)</li>
+    <li>Anzahl der Verbindungsstellen reduzieren</li>
+    <li>Kürzere Fasersegmente / direktere Trassenführung</li>
+    <li>Sender mit höherer Sendeleistung einsetzen</li>
+    <li>Empfänger mit höherer Empfindlichkeit wählen</li>
+    <li>Zwischenverstärker (Repeater) einbauen</li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Ein Azubi sagt: \"Glasfaser hat doch praktisch keine Dämpfung.\" Was ist daran falsch?", a: `<ul>
+    <li>Glasfaser hat zwar <em>sehr geringe</em> Faserdämpfung (z.B. 0,8 dB/km bei Multimode)</li>
+    <li>Aber: Steckverbindungen (0,7 dB) und Spleiße (0,2 dB) addieren sich erheblich</li>
+    <li>Auf langen Strecken mit vielen Verbindungen kann die Gesamtdämpfung das Budget überschreiten</li>
+    <li>→ Glasfaser hat wenig, aber nicht "keine" Dämpfung – Systemplanung bleibt notwendig</li>
+  </ul>` },
+  { cat: "Glasfaser", q: "Welche Komponenten verursachen Dämpfung in einer Glasfaserstrecke?", a: `<ul>
+    <li><strong>Faserdämpfung</strong> – materialbedingt, in dB/km (z.B. 0,8 dB/km)</li>
+    <li><strong>Steckverbindungen</strong> – mechanische Verbindung, ca. 0,3–1,0 dB je Stück</li>
+    <li><strong>Spleiße</strong> – verschweißte Verbindung, ca. 0,1–0,3 dB je Stück</li>
+    <li>Spleiße sind deutlich verlustarmer als Stecker</li>
+  </ul>` },
+
+  // ZEITMULTIPLEX (TDM)
+  { cat: "Zeitmultiplex", q: "Was ist das Grundprinzip des Zeitmultiplexverfahrens (TDM)?", a: `<ul>
+    <li>Mehrere Signale teilen sich ein gemeinsames Übertragungsmedium</li>
+    <li>Jedes Signal bekommt einen festen <strong>Zeitschlitz</strong> (Time Slot)</li>
+    <li>Die Signale werden zeitlich nacheinander übertragen – nicht gleichzeitig</li>
+    <li>Merksatz: <em>Ein Medium, viele Signale – aber nacheinander</em></li>
+  </ul>` },
+  { cat: "Zeitmultiplex", q: "Wie werden die einzelnen Signale im TDM-Verfahren voneinander getrennt?", a: `<ul>
+    <li><strong>Zeitschlitze</strong> – jedem Signal wird ein fester Zeitabschnitt zugewiesen</li>
+    <li><strong>Reihenfolge</strong> – Sender und Empfänger kennen die feste Zuteilung</li>
+    <li><strong>Synchronisation</strong> – Sender und Empfänger müssen exakt synchronisiert sein, damit Zeitschlitze korrekt zugeordnet werden</li>
+  </ul>` },
+  { cat: "Zeitmultiplex", q: "Nenne konkrete technische Anwendungen des Zeitmultiplexverfahrens.", a: `<ul>
+    <li>Digitale Telefonie (ISDN, GSM-Basisstation)</li>
+    <li>Datenübertragungssysteme (SDH/SONET im Weitverkehrsnetz)</li>
+    <li>Bus-Systeme (z.B. TDM-Busse in der Automatisierungstechnik)</li>
+    <li>DSL-Technologien</li>
+  </ul>` },
+  { cat: "Zeitmultiplex", q: "Was sind die Vorteile und Nachteile des Zeitmultiplexverfahrens?", a: `<ul>
+    <li><strong>Vorteile:</strong></li>
+    <li>Effiziente Nutzung des Übertragungsmediums</li>
+    <li>Viele Signale auf einer Leitung möglich</li>
+    <li>Kostengünstig (ein Medium für viele Teilnehmer)</li>
+    <li><strong>Nachteile:</strong></li>
+    <li>Hoher Synchronisationsaufwand</li>
+    <li>Feste Zeitschlitze auch bei ungenutzten Kanälen (ineffizient bei variabler Last)</li>
+    <li>Ausfall der Synchronisation → Totalausfall</li>
+  </ul>` },
+  { cat: "Zeitmultiplex", q: "Warum werden Zeitmultiplexverfahren in modernen Netzwerken eingesetzt?", a: `<ul>
+    <li>Bandbreite des Mediums wird vollständig ausgenutzt</li>
+    <li>Mehrere Nutzer/Dienste können gleichzeitig (zeitlich versetzt) übertragen werden</li>
+    <li>Skalierbar: Zeitschlitze können flexibel zugeteilt werden</li>
+    <li>Grundlage vieler Mobilfunk- und Festnetztechnologien</li>
+  </ul>` },
+  { cat: "Zeitmultiplex", q: "Was ist der Unterschied zwischen Raummultiplex und Zeitmultiplex?", a: `<ul>
+    <li><strong>Raummultiplex</strong> – jedes Signal hat eine eigene physische Leitung (räumliche Trennung)</li>
+    <li><strong>Zeitmultiplex (TDM)</strong> – alle Signale teilen eine Leitung, getrennt durch Zeitschlitze</li>
+    <li>TDM spart Leitungsressourcen, erfordert aber Synchronisation</li>
+  </ul>` },
+
+  // ÜBERTRAGUNGSMEDIEN
+  { cat: "Übertragungsmedien", q: "Was sind die wesentlichen Unterschiede zwischen kupferbasierten und lichtwellenbasierenden Übertragungsmedien?", a: `<ul>
+    <li><strong>Übertragungsrate:</strong> Kupfer bis ~10 Gbit/s (Cat8), LWL bis Tbit/s</li>
+    <li><strong>Reichweite:</strong> Kupfer max. ~100 m, LWL bis 80 km+ (Single-Mode)</li>
+    <li><strong>EMV:</strong> Kupfer störanfällig, LWL vollständig immun</li>
+    <li><strong>PoE:</strong> Kupfer kann Strom übertragen, LWL nicht</li>
+    <li><strong>Gewicht:</strong> LWL deutlich leichter als Kupfer</li>
+    <li><strong>Packdichte:</strong> Hunderte Glasfasern so dünn wie ein Kupferkabel</li>
+    <li><strong>Potenzialprobleme:</strong> Bei Kupfer möglich (Erdschleifen), LWL galvanisch getrennt</li>
+    <li><strong>Kosten:</strong> Kupfer günstiger in Anschaffung und Endgeräten</li>
+  </ul>` },
+  { cat: "Übertragungsmedien", q: "Welche Ursachen für Störeinflüsse gibt es bei kupferbasierten Übertragungsmedien? (Aspekte: Dämpfung, Übersprechen, EMV, Impedanz)", a: `<ul>
+    <li><strong>Dämpfung:</strong> Widerstand des Leiters, steigt mit Länge und Frequenz</li>
+    <li><strong>Übersprechen (NEXT/FEXT):</strong> kapazitive/induktive Kopplung zwischen Adernpaaren</li>
+    <li><strong>EMV:</strong> Einstreuung externer Felder (Motoren, Schaltnetzteile, Blitz)</li>
+    <li><strong>Impedanzfehler:</strong> Reflexionen durch falsche Anpassung oder Steckfehler</li>
+  </ul>` },
+  { cat: "Übertragungsmedien", q: "Welche Maßnahmen reduzieren Störeinflüsse bei kupferbasierten Netzwerkleitungen?", a: `<ul>
+    <li>Geschirmte Leitungen verwenden (S/FTP, F/UTP)</li>
+    <li>Verdrillung der Adernpaare (reduziert Übersprechen)</li>
+    <li>Getrennte Verlegung von Strom- und Datenleitungen</li>
+    <li>Orthogonale Kreuzung bei unvermeidbaren Parallelverlegungen</li>
+    <li>Korrekte Schirmerdung (einseitig oder beidseitig je nach Konzept)</li>
+    <li>Maximale Leitungslängen einhalten (z.B. 100 m bei Cat6a)</li>
+  </ul>` },
+  { cat: "Übertragungsmedien", q: "Wie bewertet man die Störsicherheit von Lichtwellenleitern im Vergleich zu Kupfer aus technischer Sicht?", a: `<ul>
+    <li>LWL überträgt Licht → vollständig EMV-immun</li>
+    <li>Keine galvanische Verbindung → keine Erdschleifen, keine Potenzialunterschiede</li>
+    <li>Geeignet für industrielle Umgebungen mit starken Störfeldern</li>
+    <li>Höhere Investitionskosten, aber langfristig zukunftssicher</li>
+    <li>Störsicherheit von LWL: deutlich überlegen gegenüber Kupfer</li>
+  </ul>` },
+  { cat: "Übertragungsmedien", q: "Welche Auswirkungen haben die Unterschiede zwischen Kupfer und LWL auf die Planung von Netzwerkinfrastrukturen?", a: `<ul>
+    <li>Kupfer: günstig für kurze Strecken (&lt;100 m), einfache Installation</li>
+    <li>LWL: notwendig bei langen Strecken, EMV-belasteten Bereichen (Industrie, Traforäume)</li>
+    <li>Mischinfrastrukturen: LWL als Backbone, Kupfer zur Endgeräteanbindung</li>
+    <li>Planung: Trassenführung, Schirmungskonzept, Erdungskonzept berücksichtigen</li>
+    <li>Normen: DIN EN 50173 (Strukturierte Verkabelung)</li>
+  </ul>` },
+
+  // NETZWERKTECHNIK
+  { cat: "Netzwerktechnik", mc: ["MAC-Adresse = logische Adresse 32 Bit, änderbar. IP-Adresse = Hardware-Adresse 48 Bit, fest im Gerät","MAC = Layer 3, IP = Layer 2. Beide werden durch DNS aufgelöst","MAC = weltweit eindeutig, 128 Bit (IPv6). IP = lokal eindeutig, 48 Bit, durch DHCP vergeben"], q: "Worin unterscheiden sich IP-Adressen und MAC-Adressen?", a: `<ul>
+    <li><strong>MAC-Adresse:</strong> Hardware-Adresse, 48 Bit, weltweit eindeutig, fest im Gerät, Layer 2</li>
+    <li><strong>IP-Adresse:</strong> logische Adresse, 32 Bit (IPv4) / 128 Bit (IPv6), vom Admin vergeben, Layer 3</li>
+    <li>MAC: Kommunikation im LAN. IP: Kommunikation über Netzgrenzen</li>
+    <li>ARP löst IP-Adressen in MAC-Adressen auf</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Bus → Ring → Stern mit Switch → heute Vollduplex-Ring","Koaxial-Bus → Stern mit Switch → heute wieder Bus durch WLAN","Koaxial-Bus → Stern mit Hub (eine Kollisionsdomäne) → Stern mit Switch (CSMA/CD überflüssig)"], q: "Wie hat sich Ethernet vom Bussystem zu heutigen Topologien entwickelt?", a: `<ul>
+    <li><strong>Ursprung:</strong> Koaxialkabel-Bus, CSMA/CD nötig wegen Kollisionen</li>
+    <li><strong>Hub:</strong> Physisch Stern, logisch Bus – eine Kollisionsdomäne für alle Ports</li>
+    <li><strong>Switch ersetzt Hub:</strong> Jeder Port eigene Kollisionsdomäne, Vollduplex möglich</li>
+    <li><strong>Heute:</strong> Geswitchte Stern-Topologie, CSMA/CD praktisch irrelevant</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["CSMA/CD = Collision Sensing Multiple Access / Collision Detection – erkennt Kollisionen vor dem Senden","CSMA/CD = Carrier Sense Multiple Access / Collision Detection – bei Kollision weitersenden und ignorieren","CSMA/CD = Carrier Signal Multiple Access / Collision Division – teilt das Medium in Zeitschlitze auf"], q: "Was ist das CSMA/CD-Verfahren?", a: `<ul>
+    <li><strong>CSMA/CD</strong> = Carrier Sense Multiple Access / Collision Detection</li>
+    <li>Vor dem Senden: prüfen ob Medium frei ist</li>
+    <li>Kollision erkannt → stoppen, Jamming-Signal, zufällige Wartezeit, erneut senden</li>
+    <li>Heute bei geswitchten Netzen (Vollduplex) kaum noch relevant</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Physikalisch = Datenfluss, logisch = Kabelverlegung. Beispiel: physisch Ring, logisch Stern","Physikalisch = logische Struktur der Datenpakete. Logisch = die tatsächliche Kabelführung im Gebäude","Physikalisch = virtuelle Verbindung im Netz. Logisch = physischer Aufbau der Netzwerkkarten"], q: "Was ist der Unterschied zwischen physikalischer und logischer Topologie?", a: `<ul>
+    <li><strong>Physikalisch:</strong> Tatsächliche Kabelverlegung/Hardware-Anordnung</li>
+    <li><strong>Logisch:</strong> Weg den Daten nehmen (unabhängig vom physischen Aufbau)</li>
+    <li>Beispiel: Physisch Stern (alle Kabel zum Switch), logisch Punkt-zu-Punkt</li>
+    <li>WLAN: physisch kein Kabel, logisch oft Bus (gemeinsames Medium)</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["VLAN = physische Netztrennung durch separate Kabel. VLAN-Tag = MAC-Adresse des Switches","VLAN = Verschlüsselung des Netzverkehrs. VLAN-Tag = 8-Byte-Feld mit Sicherheitsschlüssel","VLAN = logische Netztrennung durch eigene IP-Bereiche ohne Switch-Unterstützung möglich"], q: "Was sind VLANs und wozu dient der VLAN-Tag?", a: `<ul>
+    <li><strong>VLAN</strong> = logische Trennung eines physischen Netzes in unabhängige Netze</li>
+    <li>Zwischen VLANs nur über Router/Layer-3-Switch kommunizierbar</li>
+    <li><strong>VLAN-Tag (802.1q):</strong> 4-Byte-Feld im Ethernet-Frame mit VLAN-ID (0–4095)</li>
+    <li>Vorteile: Sicherheit, Broadcast-Reduktion, flexible Netzstruktur ohne neue Kabel</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Trunking = mehrere Switches verbinden ohne Tags. Access-Port = überträgt alle VLANs getaggt","Trunking = ein VLAN über mehrere physische Leitungen verteilen. Trunk-Port = nur für Endgeräte","Trunking = Verbindung mehrerer VLANs über eine Leitung mit 802.1q-Tags. Access-Port = nur für Switches"], q: "Was ist VLAN-Trunking?", a: `<ul>
+    <li>Trunking = mehrere VLANs über eine physische Verbindung mit 802.1q-Tag</li>
+    <li><strong>Trunk-Port:</strong> getaggte Frames mehrerer VLANs – zwischen Switches</li>
+    <li><strong>Access-Port:</strong> ungetaggt, ein VLAN – für Endgeräte (PC, Drucker)</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["802.1q-Tag: 2 Byte TPID (0x0800) + 2 Byte TCI mit VLAN-ID (16 Bit)","802.1q-Tag: 8 Byte zwischen IP- und MAC-Header. Enthält nur VLAN-ID (16 Bit)","802.1q-Tag: 4 Byte – TPID (0x8100) + TCI mit PCP (3 Bit), DEI (1 Bit), VLAN-ID (12 Bit)"], q: "Was ist ein 802.1q-Header und was enthält er?", a: `<ul>
+    <li>Standard für VLAN-Tagging im Ethernet-Frame (4 Byte zwischen Quell-MAC und Typ-Feld)</li>
+    <li><strong>TPID</strong> (2 Byte): Wert 0x8100 → zeigt VLAN-Tag an</li>
+    <li><strong>TCI</strong> (2 Byte): PCP (Priority, 3 Bit) + DEI (1 Bit) + VLAN-ID (12 Bit, 1–4094)</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["/19 → Subnetting im 2. Oktett, da 19 > 16. Erste 2,5 Oktette = Netzanteil","/19 → Subnetting im 4. Oktett, da 19 Bits übrig nach 3 vollen Oktetten","/19 → Subnetting im 3. Oktett: 19 ÷ 8 = 2 Rest 3 → 3. Oktett, aber erste 5 Bits = Netz"], q: "Wie bestimmt man bei einer IP-Adresse mit CIDR-Notation (z.B. /19), in welchem Oktett das Subnetting stattfindet?", a: `<ul>
+    <li>/19 → 19 ÷ 8 = 2 Rest 3 → Subnetting im <strong>3. Oktett</strong></li>
+    <li>Erste 2 Oktette vollständig Netz, im 3. Oktett: 3 Bits Netz, 5 Bits Host</li>
+    <li>Faustregel: Präfix ÷ 8 → Quotient = volle Oktette, Rest > 0 → nächstes Oktett</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["162.15.17.129 /19 → Netzadresse: 162.15.17.0 (AND mit 255.255.255.0)","162.15.17.129 /19 → Netzadresse: 162.15.32.0 (17 liegt in Block .32)","162.15.17.129 /19 → Netzadresse: 162.15.16.0 (AND mit 255.255.240.0)"], q: "Wie berechnet man die Netzadresse aus einer IP-Adresse mit CIDR? (Beispiel: 162.15.17.129 /19)", a: `<ul>
+    <li>/19 → Maske: 255.255.224.0</li>
+    <li>3. Oktett: 17 AND 224 = 0 → <strong>Netzadresse: 162.15.0.0</strong></li>
+    <li>Schrittweite: 256−224=32 → Blöcke .0, .32, .64... → 17 liegt in Block .0</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["162.15.0.0 /19 → Broadcast: 162.15.31.128 (letztes Bit gesetzt)","162.15.0.0 /19 → Broadcast: 162.15.0.255 (nur letztes Oktett invertiert)","162.15.0.0 /19 → Broadcast: 162.15.255.255 (Oktett 3 und 4 invertiert)"], q: "Wie bestimmt man die Broadcast-Adresse aus einer Netzadresse? (Beispiel: 162.15.0.0 /19)", a: `<ul>
+    <li>Maske invertieren: 255.255.224.0 → 0.0.31.255</li>
+    <li>OR mit Netzadresse: 162.15.0.0 OR 0.0.31.255 = <strong>162.15.31.255</strong></li>
+    <li>Nutzbare Hosts: 162.15.0.1 bis 162.15.31.254 (2^13 − 2 = 8190)</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Broadcast = Paket an alle Geräte weltweit. Multicast = Paket an zwei Geräte. Point-to-Point = an Gruppe","Broadcast = Adressbereich 224.x.x.x. Multicast = 192.168.x.x. Point-to-Point = 255.255.255.255","Broadcast = alle Geräte im Netz. Point-to-Point = zwei Geräte direkt. Multicast = Gruppe von Empfängern (224.x.x.x)"], q: "Was bedeuten Broadcast, Point-to-Point und Multicast in der Netzwerktechnik?", a: `<ul>
+    <li><strong>Broadcast:</strong> An alle Geräte im Netz (z.B. 192.168.1.255)</li>
+    <li><strong>Point-to-Point (Unicast):</strong> An genau ein Zielgerät</li>
+    <li><strong>Multicast:</strong> An eine Gruppe (224.0.0.0–239.255.255.255) – nur Abonnenten empfangen</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Subnetting = Zusammenfassen mehrerer Netze zu einem größeren Netz (Supernetting)","Subnetting = Vergabe von IP-Adressen durch DHCP ohne manuelle Konfiguration","Subnetting = Aufteilung in Subnetze. Vorteil: mehr IP-Adressen verfügbar, keine Broadcast-Trennung"], q: "Was ist Subnetting und welche Vorteile hat es?", a: `<ul>
+    <li>Aufteilung eines IP-Netzwerks in kleinere Teilnetze</li>
+    <li>Weniger Broadcast-Traffic, erhöhte Sicherheit, bessere Struktur</li>
+    <li>Effizientere IP-Nutzung, einfacheres Troubleshooting</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Router wählt immer die kürzeste Route nach Hop-Anzahl (Shortest Path First)","Router sendet Pakete immer an den Default-Gateway, der dann weiterleitet","Router vergleicht Ziel-IP mit Routing-Tabelle (Longest Prefix Match), dann Default-Route"], q: "Wie entscheidet ein Router, wohin er ein Paket weiterleitet?", a: `<ul>
+    <li>Vergleich Ziel-IP mit <strong>Routing-Tabelle</strong> (Longest Prefix Match)</li>
+    <li>Kein Treffer → Default-Route (0.0.0.0/0) wird verwendet</li>
+    <li>Admin konfiguriert: Zielnetz + Subnetzmaske + Next-Hop-IP</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Default-Route: ip route 255.255.255.255 255.255.255.255 [Next-Hop]. CIDR: 255.255.255.255/32","Default-Route: ip route 0.0.0.0 255.255.255.255 [Next-Hop]. CIDR: 0.0.0.0/32","Default-Route: ip route 0.0.0.0 0.0.0.0 [Next-Hop]. CIDR: 0.0.0.0/0 – fängt alle Pakete ohne Eintrag"], q: "Wie sieht ein Routingeintrag für eine Default-Route aus?", a: `<ul>
+    <li>Auffangroute für Pakete ohne spezifischen Eintrag</li>
+    <div class="formula">ip route 0.0.0.0 0.0.0.0 [Next-Hop-IP]</div>
+    <li>CIDR: 0.0.0.0/0 – typisch Richtung Provider/Internet</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Layer-3-Switch = Switch mit WLAN-Controller. Unterschied: kann Funksignale routen","Layer-3-Switch = Switch der auf Schicht 1 und 2 arbeitet. Unterschied zum Router: kein IP-Support","Layer-2-Switch: nur MAC-Adressen. Layer-3-Switch: zusätzlich IP-Routing zwischen VLANs (SVI)"], q: "Was ist ein Layer-3-Switch und wie unterscheidet er sich vom normalen Switch?", a: `<ul>
+    <li><strong>Layer-2-Switch:</strong> Vermittelt anhand MAC-Adressen, nur innerhalb eines Netzes</li>
+    <li><strong>Layer-3-Switch:</strong> Zusätzlich IP-Routing zwischen VLANs – kein externer Router nötig</li>
+    <li>SVI (Switch Virtual Interface): jedes VLAN hat eigene IP – Vorteil: höhere Geschwindigkeit</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Link-local = weltweit routbar (2000::/3). Local = nur lokal (fc00::/7). Global = nur im LAN (fe80::/10)","Link-local = automatisch, nicht routbar (fe80::/10). Local = privat, nicht routbar (fc00::/7). Global = routbar (2000::/3)","Link-local = manuell konfiguriert. Local = automatisch via DHCPv6. Global = nur über VPN erreichbar"], q: "Was bedeuten Link-local, Local (Unique Local) und Global im Kontext von IPv6?", a: `<ul>
+    <li><strong>Link-local (fe80::/10):</strong> Automatisch, nur im direkt verbundenen Netz, nicht routbar</li>
+    <li><strong>Unique Local (fc00::/7):</strong> Wie private IPv4-Adressen – nicht im Internet routbar</li>
+    <li><strong>Global Unicast (2000::/3):</strong> Weltweit eindeutig und routbar</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["IPv6: erste 64 Bit = Interface Identifier (Gerät). Letzte 64 Bit = Prefix (Netz)","IPv6: Prefix = letzte 128 Bit. Interface ID = erste 64 Bit. Beide vom ISP vergeben","IPv6: Prefix = Netzanteil (erste 64 Bit). Interface Identifier = Hostanteil (letzte 64 Bit)"], q: "Was ist ein Prefix und was ist ein Interface Identifier bei einer IPv6-Adresse?", a: `<ul>
+    <li>IPv6 = 128 Bit, aufgeteilt in zwei Hälften (je 64 Bit)</li>
+    <li><strong>Prefix (erste 64 Bit):</strong> Netzanteil – vom ISP/Admin vergeben</li>
+    <li><strong>Interface Identifier (letzte 64 Bit):</strong> Hostanteil – aus MAC (EUI-64) oder zufällig</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["ARP = Address Routing Protocol – leitet Pakete zwischen Netzen weiter","ARP = Automatic Resolution Protocol – vergibt IP-Adressen automatisch per Broadcast","ARP = löst IP- in MAC-Adressen auf. Bei IPv6 durch NDP ersetzt"], q: "Was ist ARP und wofür wird es benötigt?", a: `<ul>
+    <li><strong>ARP</strong> = Address Resolution Protocol</li>
+    <li>Löst IP-Adressen in MAC-Adressen auf (Layer 3 → Layer 2)</li>
+    <li>ARP-Request als Broadcast → Besitzer antwortet mit MAC → ARP-Cache</li>
+    <li>Bei IPv6: ersetzt durch Neighbor Discovery Protocol (NDP)</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Hub = Layer 2 (MAC), Switch = Layer 3 (IP), Router = Layer 1 (Bits)","Hub = Layer 1, Switch = Layer 2 (MAC), Router = Layer 2 (MAC und IP kombiniert)","Hub = Layer 1 (alle Ports eine Kollisionsdomäne), Switch = Layer 2 (MAC), Router = Layer 3 (IP)"], q: "Was sind die Unterschiede zwischen Hub, Switch und Router?", a: `<ul>
+    <li><strong>Hub (Layer 1):</strong> Alle Ports = eine Kollisionsdomäne, veraltet</li>
+    <li><strong>Switch (Layer 2):</strong> Jeder Port eigene Kollisionsdomäne, MAC-Tabelle</li>
+    <li><strong>Router (Layer 3):</strong> Verbindet Netze, IP-Routing, trennt Broadcast-Domänen</li>
+  </ul>` },
+  { cat: "Netzwerktechnik", mc: ["Access-Port = mehrere VLANs getaggt. Trunk-Port = ein VLAN ungetaggt für Endgeräte","Access-Port = Verbindung zwischen Switches mit Tags. Trunk-Port = Verbindung zu Endgeräten ohne Tags","Access-Port = ein VLAN ungetaggt für Endgeräte. Trunk-Port = mehrere VLANs getaggt zwischen Switches"], q: "Was ist der Unterschied zwischen einem Access-Port und einem Trunk-Port am Switch?", a: `<ul>
+    <li><strong>Access-Port:</strong> Ein VLAN, ungetaggt – für Endgeräte (PC, Drucker)</li>
+    <li><strong>Trunk-Port:</strong> Mehrere VLANs mit 802.1q-Tag – zwischen Switches/Router</li>
+  </ul>` },
+  // BETRIEBSFÜHRUNG
+  { cat: "Betriebsführung", mc: ["Autoritär = Mitarbeiter entscheiden alles. Kooperativ = Chef entscheidet allein. Laissez-faire = Abstimmung im Team","Autoritär = Chef entscheidet allein, strenge Hierarchie. Kooperativ = gemeinsame Entscheidungen. Laissez-faire = maximale Mitarbeiterfreiheit","Autoritär = flexible Hierarchie. Kooperativ = Chef gibt Richtung vor, Mitarbeiter führen aus. Laissez-faire = keine Führung nötig"], q: "Nenne drei Führungsstile und beschreibe alle drei genauer.", a: `<ul>
+    <li><strong>Autoritär:</strong> Chef entscheidet allein, strenge Hierarchie. Vorteil: schnelle Entscheidungen. Nachteil: Demotivation</li>
+    <li><strong>Kooperativ:</strong> Gemeinsame Entscheidungen, konstruktive Kritik willkommen. Vorteile: Motivation, Eigeninitiative</li>
+    <li><strong>Laissez-faire:</strong> Maximale Mitarbeiterfreiheit. Vorteile: Innovation. Nachteil: fehlende Orientierung</li>
+  </ul>` },
+  { cat: "Betriebsführung", mc: ["Vorteile: weniger Krankheitstage, günstigere Miete, mehr Urlaubstage. Einführung: sofort für alle Mitarbeiter","Vorteile: Produktivität, Work-Life-Balance, Arbeitgeberattraktivität. Einführung: Pilotprojekt, schrittweise, flexibles Modell","Vorteile: niedrigere Lohnkosten, weniger Energie, mehr Gewinn. Einführung: gesetzlich vorgeschrieben ab 2026"], q: "Was sind die Vorteile der 4-Tage-Woche und wie kann sie eingeführt werden?", a: `<ul>
+    <li>Höhere Produktivität, bessere Work-Life-Balance, Steigerung der Arbeitgeberattraktivität</li>
+    <li>Entlohnung: gleiches oder reduziertes Gehalt bei weniger Stunden</li>
+    <li>Einführung: Pilotprojekt → schrittweise Reduzierung → flexibles Modell</li>
+  </ul>` },
+  { cat: "Betriebsführung", mc: ["Analyse → Strategie → Ziele → Kontrolle → Maßnahmen","Ziele → Analyse → Maßnahmen → Strategie → Kontrolle","Analyse → Ziele → Strategie → Maßnahmen (4P) → Erfolgskontrolle"], q: "Was sind die 5 Schritte eines Marketingkonzepts?", a: `<ul>
+    <li><strong>Merksatz: Analyse → Ziele → Strategie → Maßnahmen → Kontrolle</strong></li>
+    <li>1. Situationsanalyse (SWOT), 2. Marketingziele (SMART), 3. Strategie entwickeln</li>
+    <li>4. Marketingmaßnahmen (4P: Produkt, Preis, Platzierung, Promotion)</li>
+    <li>5. Erfolgskontrolle – kontinuierliche Optimierung</li>
+  </ul>` },
+  { cat: "Betriebsführung", mc: ["AGB = individuelle Vertragsverhandlungen mit jedem Kunden. Gelten nur bei expliziter Zustimmung im Einzelfall","AGB = Allgemeine Grundlegende Bedingungen – steuerrechtliche Vorschriften für Unternehmen","AGB = rechtliche Rahmenbedingungen vorab festlegen, für viele Verträge gleicher Art. Müssen zugänglich sein (§ 307 BGB)"], q: "Was ist der Zweck von AGB (Allgemeine Geschäftsbedingungen)?", a: `<ul>
+    <li>Rechtliche Rahmenbedingungen eines Vertrags vorab festlegen</li>
+    <li>Gelten für viele Verträge gleicher Art – schaffen Rechtssicherheit</li>
+    <li>Müssen vor Vertragsabschluss zugänglich sein, dürfen nicht unangemessen benachteiligen (§ 307 BGB)</li>
+  </ul>` },
+  { cat: "Betriebsführung", mc: ["Selbstkosten = Verkaufspreis minus Gewinn. Ermittlung über Marktanalyse","Selbstkosten = nur Materialkosten. Personalkosten werden separat berechnet","Selbstkosten = alle Kosten bei Produktion von Gütern/DL (Personal, Material, Energie, Fahrt). Grundlage der Kalkulation"], q: "Was sind Selbstkosten und warum sind sie für die Kalkulation wichtig?", a: `<ul>
+    <li>Alle Kosten bei der Produktion von Gütern und Dienstleistungen</li>
+    <li>Ermittlung über Selbstkostenrechnung – Grundlage der betrieblichen Kalkulation</li>
+    <li>Beispiele: Personalkosten, Materialkosten, Energiekosten, Fahrtkosten</li>
+    <li>Ohne Selbstkosten: Risiko, Aufträge unter Einstandspreis anzubieten</li>
+  </ul>` },
+  { cat: "Betriebsführung", mc: ["Gewinn ist in der Kalkulation unwichtig – Marktpreis wird extern bestimmt. Nur Selbstkosten zählen","Zu hoher Gewinn = höhere Qualität. Zu niedriger Gewinn = weniger Steuern. Gewinn hat keinen Einfluss auf Wettbewerb","Zu hoher Gewinn = nicht konkurrenzfähig. Zu niedriger Gewinn = Investitionen und Zukunft gefährdet"], q: "Warum ist die Höhe des festgesetzten Gewinns in der Kalkulation von großer Bedeutung?", a: `<ul>
+    <li>Gewinn bestimmt den Verkaufspreis (Selbstkosten + Gewinn = Angebotspreis)</li>
+    <li>Zu hoch → Preise nicht konkurrenzfähig. Zu niedrig → Zukunft gefährdet</li>
+    <li>Gewinn wichtig für Investitionen, Wachstum und finanzielle Stabilität</li>
+  </ul>` },
+
+  // OSI-SCHICHTENMODELL
+  { cat: "OSI-Modell", mc: ["7=Bitübertragung, 6=Sicherung, 5=Vermittlung, 4=Transport, 3=Sitzung, 2=Darstellung, 1=Anwendung","7=Anwendung, 6=Darstellung, 5=Sitzung, 4=Transport, 3=Vermittlung, 2=Sicherung, 1=Bitübertragung","7=Anwendung, 6=Sitzung, 5=Darstellung, 4=Vermittlung, 3=Transport, 2=Bitübertragung, 1=Sicherung"], q: "Nenne alle 7 Schichten des OSI-Modells in der richtigen Reihenfolge.", a: `<ul>
+    <li><strong>7 – Anwendungsschicht</strong> (Application Layer)</li>
+    <li><strong>6 – Darstellungsschicht</strong> (Presentation Layer)</li>
+    <li><strong>5 – Sitzungsschicht</strong> (Session Layer)</li>
+    <li><strong>4 – Transportschicht</strong> (Transport Layer)</li>
+    <li><strong>3 – Vermittlungsschicht</strong> (Network Layer)</li>
+    <li><strong>2 – Sicherungsschicht</strong> (Data Link Layer)</li>
+    <li><strong>1 – Bitübertragungsschicht</strong> (Physical Layer)</li>
+    <li>Merkhilfe: <em>„Alle Deutschen Studenten Trinken Verschiedene Sorten Bier"</em></li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["OSI = praktisches Protokoll für Internet-Kommunikation. Jede Schicht kommuniziert mit allen anderen","OSI = herstellerspezifisches Modell – gilt nur für Cisco-Geräte. Schichten kommunizieren bilateral","OSI = 7-Schichten-Referenzmodell. Jede Schicht hat definierte Aufgabe, kommuniziert nur mit Nachbarschichten"], q: "Was ist der Grundgedanke hinter dem OSI-Schichtenmodell?", a: `<ul>
+    <li>7 klar definierte Schichten, jede mit genau einer Aufgabe</li>
+    <li>Jede Schicht kommuniziert nur mit direkt darüber/darunterliegender Schicht</li>
+    <li>Hersteller können Protokolle unabhängig entwickeln – Fehlersuche wird einfacher</li>
+    <li>Referenzmodell – kein echtes Protokoll, sondern Ordnungsrahmen</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["OSI = 5 Schichten, praxisorientiert. TCP/IP = 7 Schichten, theoretisch. OSI ist Standard im Internet","OSI = 7 Schichten, theoretisch. TCP/IP = 7 Schichten, ergänzt OSI. Beide gleichwertig eingesetzt","OSI = 7 Schichten, theoretisch. TCP/IP = 4 Schichten, praxisorientiert. TCP/IP ist Standard im Internet"], q: "Was ist der Unterschied zwischen dem OSI-Modell und dem TCP/IP-Modell?", a: `<ul>
+    <li><strong>OSI:</strong> 7 Schichten, theoretisches Referenzmodell</li>
+    <li><strong>TCP/IP:</strong> 4 Schichten, praxisorientiert, Grundlage des Internets</li>
+    <li>OSI-Schichten 5–7 → TCP/IP Anwendungsschicht. OSI 1–2 → TCP/IP Netzzugangsschicht</li>
+    <li>TCP/IP ist eingesetzt, OSI ist Lehrmodell</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Schicht 1: IP-Adressierung und Routing. Geräte: Router, Layer-3-Switch","Schicht 1: MAC-Adressierung und Framing. Geräte: Switch, Bridge, Access Point","Schicht 1: physische Bit-Übertragung (Signale). Geräte: Kabel, Hub, Repeater"], q: "Was macht Schicht 1 (Bitübertragung) und welche Geräte/Medien arbeiten dort?", a: `<ul>
+    <li>Physische Übertragung von Bits als elektrische Signale, Licht oder Funkwellen</li>
+    <li>Definiert: Stecker, Kabel, Spannungspegel, Pinbelegungen</li>
+    <li><strong>Geräte:</strong> Kupferkabel, Glasfaser, Hub, Repeater</li>
+    <li>Keine Fehlerkorrektur oder Adressierung – nur rohe Bits</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Schicht 2: IP-Routing zwischen Netzen. PDU = Paket. Geräte: Router","Schicht 2: Ende-zu-Ende-Verbindung, Portnummern. PDU = Segment. Geräte: Firewall","Schicht 2: MAC-Adressierung, Framing, CRC. PDU = Frame. Geräte: Switch, Bridge"], q: "Was macht Schicht 2 (Sicherungsschicht) und welche Geräte arbeiten dort?", a: `<ul>
+    <li>Zuverlässige Übertragung zwischen direkt verbundenen Geräten</li>
+    <li>Aufgaben: Framing, MAC-Adressierung, Fehlererkennung (CRC)</li>
+    <li><strong>Geräte:</strong> Switch, Bridge, WLAN Access Point</li>
+    <li>PDU = <strong>Frame</strong></li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Schicht 3: MAC-Adressierung, PDU = Frame. Geräte: Switch","Schicht 3: Segmentierung und Portnummern. PDU = Segment. Geräte: Firewall","Schicht 3: IP-Adressierung, Routing, PDU = Paket. Geräte: Router, Layer-3-Switch"], q: "Was macht Schicht 3 (Vermittlungsschicht) und welche Geräte arbeiten dort?", a: `<ul>
+    <li>Logische Adressierung und Routing über Netzgrenzen</li>
+    <li>Protokolle: IP, ICMP, ARP, OSPF, BGP</li>
+    <li><strong>Geräte:</strong> Router, Layer-3-Switch</li>
+    <li>PDU = <strong>Paket</strong></li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["TCP = verbindungslos, schnell, kein ACK. UDP = verbindungsorientiert, langsamer, mit ACK","TCP und UDP sind identisch – Unterschied nur im Header-Format, keine funktionale Differenz","TCP = verbindungsorientiert, zuverlässig, mit ACK. UDP = verbindungslos, schneller, kein ACK"], q: "Was macht Schicht 4 (Transportschicht) und was ist der Unterschied zwischen TCP und UDP?", a: `<ul>
+    <li>Ende-zu-Ende-Kommunikation, Segmentierung, Portnummern</li>
+    <li><strong>TCP:</strong> verbindungsorientiert, zuverlässig, ACK, langsamer (HTTP, FTP, E-Mail)</li>
+    <li><strong>UDP:</strong> verbindungslos, schneller, kein ACK (VoIP, Streaming, DNS)</li>
+    <li>PDU = Segment (TCP) / Datagramm (UDP)</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Schicht 5 = Routing, Schicht 6 = Verschlüsselung, Schicht 7 = Datenbankzugriff","Schicht 5 = Framing, Schicht 6 = IP-Adressierung, Schicht 7 = MAC-Verwaltung","Schicht 5 = Sitzungsverwaltung (NetBIOS), Schicht 6 = Verschlüsselung/Kompression (SSL/TLS), Schicht 7 = Anwendungsschnittstelle (HTTP, FTP)"], q: "Was machen die Schichten 5, 6 und 7 des OSI-Modells?", a: `<ul>
+    <li><strong>Schicht 5 (Sitzung):</strong> Aufbau/Verwaltung/Abbau von Sitzungen. z.B. NetBIOS, RPC</li>
+    <li><strong>Schicht 6 (Darstellung):</strong> Übersetzung, Verschlüsselung, Kompression. z.B. SSL/TLS, JPEG</li>
+    <li><strong>Schicht 7 (Anwendung):</strong> Schnittstelle zur Software. z.B. HTTP, FTP, SMTP, DNS</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Hub = Layer 3, Switch = Layer 2, Router = Layer 1","Hub = Layer 2 (MAC), Switch = Layer 3 (IP), Router = Layer 4 (Ports)","Hub = Layer 1 (Bits/Signale), Switch = Layer 2 (MAC), Router = Layer 3 (IP)"], q: "Auf welcher OSI-Schicht arbeiten Hub, Switch und Router?", a: `<ul>
+    <li><strong>Hub:</strong> Layer 1 – alle Signale an alle Ports</li>
+    <li><strong>Switch:</strong> Layer 2 – vermittelt anhand MAC-Adressen</li>
+    <li><strong>Router:</strong> Layer 3 – leitet anhand IP-Adressen weiter</li>
+    <li>Layer-3-Switch: Layer 2+3. Firewall/Proxy: Layer 4–7</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["PDU heißt auf allen Schichten gleich: 'Paket'. Schichten unterscheiden sich nur durch Header-Größe","Schicht 7–5: Frame, Schicht 4: Segment, Schicht 3: Datagramm, Schicht 2: Paket, Schicht 1: Byte","Schicht 7–5: Daten, Schicht 4: Segment/Datagramm, Schicht 3: Paket, Schicht 2: Frame, Schicht 1: Bit"], q: "Was ist eine PDU (Protocol Data Unit) und wie heißt sie auf jeder Schicht?", a: `<ul>
+    <li>PDU = Dateneinheit mit Header der jeweiligen Schicht</li>
+    <li>Schicht 7–5: Daten | Schicht 4: Segment (TCP) / Datagramm (UDP)</li>
+    <li>Schicht 3: Paket | Schicht 2: Frame | Schicht 1: Bit</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Enkapsulierung = jede Schicht entfernt beim Senden ihren Header. Beim Empfang wird er wieder hinzugefügt","Enkapsulierung = Verschlüsselung der Daten durch jede Schicht. Empfänger entschlüsselt in umgekehrter Reihenfolge","Enkapsulierung = jede Schicht fügt beim Senden einen Header hinzu. Empfänger dekapsuliert schichtweise"], q: "Was bedeutet Enkapsulierung (Encapsulation) im OSI-Modell?", a: `<ul>
+    <li>Jede Schicht fügt beim Senden einen eigenen Header hinzu</li>
+    <li>Schicht 7 → Schicht 4 (TCP-Header) → Schicht 3 (IP-Header) → Schicht 2 (MAC+Trailer) → Schicht 1 (Bits)</li>
+    <li>Beim Empfänger: Dekapsulierung in umgekehrter Reihenfolge</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["Schicht 3: TCP, UDP. Schicht 4: IP, ICMP. Schicht 7: ARP, OSPF","Schicht 3: HTTP, FTP, SMTP. Schicht 4: IP, ICMP. Schicht 7: TCP, UDP","Schicht 3: IP, ICMP, ARP. Schicht 4: TCP, UDP. Schicht 7: HTTP, FTP, DNS, SMTP"], q: "Welche Protokolle sind typische Beispiele für Schicht 3, 4 und 7?", a: `<ul>
+    <li><strong>Schicht 3:</strong> IPv4, IPv6, ICMP, ARP, OSPF, BGP</li>
+    <li><strong>Schicht 4:</strong> TCP, UDP</li>
+    <li><strong>Schicht 7:</strong> HTTP/HTTPS, FTP, SMTP, DNS, DHCP, SSH</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["3-Way-Handshake: SYN → FIN → ACK. Verbindungsabbau bei gleichzeitigem Aufbau","3-Way-Handshake: SYN → SYN-ACK → FIN. Danach Verbindungsabbau mit RST","3-Way-Handshake: SYN (Client) → SYN-ACK (Server) → ACK (Client). Dann Datenübertragung"], q: "Was ist der 3-Way-Handshake bei TCP und wie läuft er ab?", a: `<ul>
+    <li>Baut zuverlässige TCP-Verbindung auf vor Datenübertragung</li>
+    <li>1. <strong>SYN</strong> – Client sendet Verbindungsanfrage</li>
+    <li>2. <strong>SYN-ACK</strong> – Server bestätigt + eigene Anfrage</li>
+    <li>3. <strong>ACK</strong> – Client bestätigt → Verbindung steht</li>
+    <li>Abbau: FIN/ACK-Sequenz</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["SYN = Verbindung beenden. ACK = Verbindung aufbauen. FIN = Daten sofort weiterleiten. RST = Pause","SYN = Synchronize (Aufbau). ACK = Acknowledge (Bestätigung). FIN = Finish (Abbau). RST = Reset (sofort abbrechen)","SYN = Synchronize. ACK = Acknowledge. FIN = Forward. RST = Restart – startet Verbindung neu"], q: "Was bedeuten die TCP-Flags SYN, ACK, FIN und RST?", a: `<ul>
+    <li><strong>SYN</strong> = Synchronize – Verbindungsaufbau</li>
+    <li><strong>ACK</strong> = Acknowledge – Empfang bestätigen</li>
+    <li><strong>FIN</strong> = Finish – geordneter Verbindungsabbau</li>
+    <li><strong>RST</strong> = Reset – sofortiger Abbruch</li>
+    <li>PSH = sofort weiterleiten. URG = dringend/vorrangig</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["TCP für VoIP und Streaming (Geschwindigkeit wichtig). UDP für HTTP und FTP (Zuverlässigkeit wichtig)","TCP und UDP für alle Anwendungen gleich – Unterschied nur bei verschlüsselten Verbindungen","TCP für HTTP, E-Mail, FTP (Zuverlässigkeit). UDP für VoIP, Streaming, Gaming, DNS (Geschwindigkeit)"], q: "Wann verwendet man TCP, wann UDP?", a: `<ul>
+    <li><strong>TCP:</strong> Zuverlässigkeit wichtiger als Geschwindigkeit – HTTP/HTTPS, E-Mail, FTP, SSH</li>
+    <li><strong>UDP:</strong> Geschwindigkeit wichtiger als Vollständigkeit – VoIP, Video-Streaming, Gaming, DNS</li>
+    <li>Bei VoIP: verlorenes Paket besser als Verzögerung durch Wiederholung</li>
+  </ul>` },
+  { cat: "OSI-Modell", mc: ["G.711 = Video-Codec für HD-Videokonferenzen. Bitrate: 256 kbit/s. Beide Varianten: H.264/H.265","G.711 = Audio-Codec für Bluetooth. 44.100 Abtastungen/s, 16 Bit. Überträgt via TCP","G.711 = ITU-T Sprachkodierungsstandard. 8.000 Abtastungen/s, 64 kbit/s. A-Law (EU) / µ-Law (USA). Überträgt via UDP"], q: "Was ist G.711 und wofür wird es verwendet?", a: `<ul>
+    <li>ITU-T-Standard für digitale Sprachkodierung (VoIP, ISDN)</li>
+    <li>8.000 Abtastungen/s × 8 Bit = <strong>64 kbit/s</strong></li>
+    <li><strong>A-Law</strong> (Europa) / <strong>µ-Law</strong> (USA/Japan)</li>
+    <li>Überträgt über UDP (Echtzeit wichtiger als Fehlerkorrektur)</li>
+  </ul>` },
+  // GLASFASERSTRECKE
+  { cat: "VDE Grundlagen", mc: ["Gesetze → EU-Richtlinien → Verordnungen → Vorschriften → DIN VDE","DIN VDE → Vorschriften → Verordnungen → Gesetze → EU-Richtlinien","Verordnungen → Gesetze → EU-Richtlinien → DIN VDE → Vorschriften"], q: "Ordnen Sie nach absteigender Rechtsverbindlichkeit: Gesetze, EU-Richtlinien, Verordnungen, Vorschriften, DIN VDE-Bestimmungen", a: `<ul>
+    <li><strong>1. EU-Richtlinien</strong> – z.B. Niederspannungsrichtlinie (höchste Verbindlichkeit)</li>
+    <li><strong>2. Gesetze</strong> – z.B. EnWG, StGB</li>
+    <li><strong>3. Verordnungen</strong> – z.B. NAV, MBO, LBO</li>
+    <li><strong>4. Vorschriften</strong> – z.B. DGUV-V3, TAB</li>
+    <li><strong>5. DIN VDE-Bestimmungen</strong> – z.B. DIN VDE 0100-410 (niedrigste Verbindlichkeit, aber anerkannte Regeln der Technik)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["DIN = Deutsches Ingenieur-Netzwerk, VDE = Verband Deutscher Elektriker, DKE = Deutsche Kontroll-Einrichtung","DIN = Deutsches Institut für Normung, VDE = Verband Deutscher Elektrotechniker, DKE = Deutsche Kommission für Elektrik","DIN = Deutsches Institut für Normung, VDE = Verein Deutscher Elektroingenieure, DKE = Deutsches Komitee Elektronik"], q: "Was bedeuten die Abkürzungen DIN, VDE und DKE?", a: `<ul>
+    <li><strong>DIN</strong> = Deutsches Institut für Normung e.V.</li>
+    <li><strong>VDE</strong> = Verband der Elektrotechnik Elektronik Informationstechnik e.V.</li>
+    <li><strong>DKE</strong> = Deutsche Kommission Elektrotechnik Elektronik Informationstechnik – gemeinsames Gremium von DIN und VDE zur Normungsarbeit</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Als verbindliche Gesetze – bestätigt durch BGB und Bauordnung","Als technische Empfehlungen – ohne rechtliche Bindung, nur bei ausdrücklicher Vereinbarung gültig","Als europäische Mindeststandards – bestätigt durch ISO-Normen und DIN-Vorschriften"], q: "Als was gelten die VDE-Bestimmungen und in welchen Gesetzen werden sie als solche bestätigt?", a: `<ul>
+    <li>VDE-Bestimmungen gelten als <strong>Allgemeine Regeln der Technik</strong></li>
+    <li>Sie werden bestätigt durch die <strong>Niederspannungsrichtlinie (EU)</strong> und das <strong>EnWG (Energiewirtschaftsgesetz)</strong></li>
+    <li>Wer nach VDE arbeitet, gilt als regelkonform – Abweichungen müssen gleichwertigen Schutz nachweisen</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Herausgeber: TÜV Rheinland. Vorschrift 1: 'Arbeitssicherheit', Vorschrift 3: 'Prüfung ortsveränderlicher Geräte'","Herausgeber: VDE-Verband. Vorschrift 1: 'Grundsätze der Prävention', Vorschrift 3: 'Elektrische Betriebsmittel'","Herausgeber: Berufsgenossenschaften. Vorschrift 1: 'Unfallverhütung', Vorschrift 3: 'Elektrische Anlagen und Geräte'"], q: "Wer veröffentlicht die DGUV-Vorschriften und wie lauten die Titel von DGUV Vorschrift 1 und 3?", a: `<ul>
+    <li>Herausgeber: <strong>Deutsche Gesetzliche Unfallversicherung (DGUV)</strong> – die Berufsgenossenschaften</li>
+    <li><strong>DGUV Vorschrift 1:</strong> „Grundsätze der Prävention" (allgemeine Arbeitsschutzvorschriften)</li>
+    <li><strong>DGUV Vorschrift 3:</strong> „Elektrische Anlagen und Betriebsmittel" (Prüfpflichten, Fristen, Verantwortlichkeiten)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Vollschutz = Schutz durch Abstand (z.B. Oberlandleitungen). Teilschutz = vollständige Isolierung aller aktiven Teile","Vollschutz = nur für Elektrofachkräfte. Teilschutz = für Laien durch Gehäuse und Abdeckungen","Vollschutz = Schutz durch Flatterband und Hindernisse. Teilschutz = Isolierung von Leitungen"], q: "Was ist der Unterschied zwischen Vollschutz und Teilschutz? Nennen Sie jeweils ein Beispiel.", a: `<ul>
+    <li><strong>Vollschutz:</strong> Elektrische Bauteile werden komplett gegen Berührung geschützt – ein direktes Berühren aktiver Teile wird vollständig verhindert</li>
+    <li>Beispiele: Isolierung von Kabeln/Leitungen, Abzweigdosen mit Abdeckung</li>
+    <li><strong>Teilschutz:</strong> Schutz wird durch Hindernisse, Abstand oder Abdeckungen realisiert – verhindert unbeabsichtigte, aber nicht vorsätzliche Berührung</li>
+    <li>Beispiele: Flatterband vor Gefahrenbereichen, Holzplanke vor Schalttafel, Abstand bei Oberlandleitungen (außerhalb EBR)</li>
+  </ul>` },
+
+  // VDE – ELEKTRISCHER STROM & GEFÄHRDUNG
+  { cat: "VDE Grundlagen", mc: ["1. Spannung, 2. Körperwiderstand, 3. Stromart, 4. Umgebungstemperatur","1. Einwirkdauer, 2. Spannung, 3. Körperwiderstand, 4. Umgebungsfeuchtigkeit","1. Stromstärke, 2. Spannung, 3. Frequenz, 4. Körpergröße des Betroffenen"], q: "Nennen Sie die vier wesentlichen Faktoren, von denen die Körperdurchströmung beim elektrischen Schlag abhängt.", a: `<ul>
+    <li><strong>1. Einwirkdauer</strong> – je länger, desto gefährlicher</li>
+    <li><strong>2. Stromweg</strong> – z.B. Hand–Hand oder Hand–Fuß (durch Herz = besonders gefährlich)</li>
+    <li><strong>3. Stromstärke</strong> – bestimmt die Wirkung auf den Körper</li>
+    <li><strong>4. Stromart</strong> – AC (Wechselstrom) oder DC (Gleichstrom): AC ist bei gleicher Stärke gefährlicher</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Gleichstrom ist gefährlicher, da er kontinuierlich fließt und keine Nulldurchgänge hat","Wechselstrom ist ungefährlicher, da der Körper sich an die Frequenz gewöhnen kann","Wechselstrom bei 50 Hz ist ca. 10× gefährlicher als Gleichstrom, da er Verbrennungen stärker verursacht"], q: "Welche besonderen Gefahren birgt technischer Wechselstrom (bis 500 Hz) im Vergleich zu Gleichstrom?", a: `<ul>
+    <li>Die Frequenz des Wechselstroms (50 Hz) liegt nahe der Herzfrequenz</li>
+    <li>Dadurch kann Wechselstrom den Herzrhythmus stören und <strong>Herzkammerflimmern</strong> auslösen</li>
+    <li>Wechselstrom hat bei gleicher Spannung eine etwa <strong>3–4× höhere Gefährlichkeit</strong> als Gleichstrom</li>
+    <li>Gleichstrom führt eher zu Verbrennungen und Muskelkrämpfen, aber seltener zu Kammerflimmern</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["AC1 = leichte Verbrennungen, AC2 = Muskelkrämpfe, AC3 = Atemstillstand, AC4 = Herzkammerflimmern","AC1 = wahrnehmbar harmlos, AC2 = Herzkammerflimmern möglich, AC3 = Atemstillstand, AC4 = tödlich","AC1 = nicht wahrnehmbar, AC2 = Herzkammerflimmern, AC3 = Verbrennungen, AC4 = sofortiger Tod"], q: "Beschreiben Sie die vier Bereiche der Stromgefährdungskurve (AC1 bis AC4).", a: `<ul>
+    <li><strong>AC1</strong> – nicht wahrnehmbar (unter Reizschwelle 0,5 mA) – keine Reaktion</li>
+    <li><strong>AC2</strong> – wahrnehmbar, aber keine medizinische Gefährdung</li>
+    <li><strong>AC3</strong> – kein Herzkammerflimmern, aber: Muskelkontraktionen, Atembeeinträchtigungen möglich</li>
+    <li><strong>AC4</strong> – Herzkammerflimmern, Atemstillstand, Verbrennungen möglich – lebensgefährlich</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Reizschwelle: 1 mA. Loslassschwelle: 25 mA – ab hier Muskelkrämpfe","Reizschwelle: 0,5 mA. Loslassschwelle: 30 mA – Herzflimmerschwelle","Reizschwelle: 2 mA. Loslassschwelle: 5 mA – ab hier Loslassen unmöglich"], q: "Was sind Reizschwelle und Loslassschwelle und welche Stromstärken gelten?", a: `<ul>
+    <li><strong>Reizschwelle:</strong> Ab dieser Stromstärke kann ein Mensch den Strom wahrnehmen (spüren). Sie liegt bei <strong>ca. 0,5 mA</strong> (AC)</li>
+    <li><strong>Loslassschwelle:</strong> Ab dieser Stromstärke treten Muskelkontraktionen auf, die ein Loslassen des Leiters unmöglich machen. Sie liegt bei <strong>ca. 10 mA</strong> (AC)</li>
+    <li>Oberhalb der Loslassschwelle steigt die Gefahr eines tödlichen Stromunfalls stark an</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["1. Körperdurchströmung messen, 2. dokumentieren, 3. melden","1. Gefährliche Spannung isolieren, 2. reduzieren, 3. ableiten","1. Körperdurchströmung erkennen, 2. protokollieren, 3. vermeiden"], q: "Nennen Sie die drei Schutzziele gegen gefährliche Körperdurchströmung.", a: `<ul>
+    <li><strong>1.</strong> Gefährliche Körperdurchströmung <strong>verhindern</strong></li>
+    <li><strong>2.</strong> Gefährliche Körperdurchströmung <strong>abschalten</strong></li>
+    <li><strong>3.</strong> Gefährliche Körperdurchströmung <strong>begrenzen</strong></li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Überlast durch zu viele angeschlossene Verbraucher an einem Stromkreis","Kurzschluss durch fehlerhafte Verdrahtung oder beschädigte Leitungen","Überspannung durch Blitzeinschlag oder Schalthandlungen im Netz"], q: "Was ist die häufigste Ursache für Brände in elektrischen Anlagen?", a: `<ul>
+    <li>Die häufigste Ursache ist ein <strong>Isolationsfehler</strong></li>
+    <li>Durch defekte oder gealterte Isolierung fließen Leckströme, die zu Wärmeentwicklung und schließlich zu Bränden führen können</li>
+    <li>Weitere Ursachen: Überlast, Kurzschluss, fehlerhafte Verbindungen (Übergangswiderstand)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["IP21: 1. Ziffer = Tropfwasserschutz, 2. Ziffer = Schutz gegen Finger >12,5mm","IP21: 1. Ziffer = Schutz gegen Staub >2mm, 2. Ziffer = Schutz gegen Spritzwasser","IP21: 1. Ziffer = Schutz gegen Handfläche, 2. Ziffer = Schutz gegen stehendes Wasser"], q: "Was bedeutet die IP-Schutzartbezeichnung IP21 und was sagen die erste und zweite Kennziffer aus?", a: `<ul>
+    <li><strong>IP</strong> = International Protection</li>
+    <li><strong>Erste Kennziffer (2):</strong> Fremdkörperschutz – Schutz gegen Berührung mit Fingern und Fremdkörper > 12,5 mm</li>
+    <li><strong>Zweite Kennziffer (1):</strong> Wasserschutz – Schutz gegen senkrecht herabfallende Tropfen</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Normal: AC max. 25V / DC max. 60V. Besondere Räume: AC max. 50V / DC max. 120V","Normal: AC max. 50V / DC max. 60V. Besondere Räume: AC max. 12V / DC max. 25V","Normal: AC max. 120V / DC max. 240V. Besondere Räume: AC max. 50V / DC max. 120V"], q: "Welche maximalen Berührungsspannungen dürfen nach DIN VDE 0100-410 in normalen und besonderen Räumen auftreten?", a: `<ul>
+    <li><strong>Normal (z.B. Büro, Wohnraum):</strong></li>
+    <li>AC: max. <strong>50 V</strong></li>
+    <li>DC: max. <strong>120 V</strong></li>
+    <li><strong>Besondere Räume (z.B. Landwirtschaft, DIN VDE 0100 Gruppe 700):</strong></li>
+    <li>AC: max. <strong>25 V</strong></li>
+    <li>DC: max. <strong>60 V</strong></li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Basisschutz entfällt bis: AC ≤ 50V / DC ≤ 120V. Fehlerschutz entfällt bis: AC ≤ 25V / DC ≤ 60V","Basisschutz entfällt bis: AC ≤ 12V / DC ≤ 30V. Fehlerschutz entfällt bis: AC ≤ 25V / DC ≤ 60V","Basisschutz und Fehlerschutz entfallen beide bis: AC ≤ 25V / DC ≤ 60V"], q: "SELV-Beleuchtung im Netzwerkschrank: Bis zu welchen Spannungen kann auf Basisschutz verzichtet werden, und ab wann ist Fehlerschutz nicht nötig?", a: `<ul>
+    <li><strong>Basisschutz kann entfallen bis:</strong></li>
+    <li>AC: ≤ 25 V</li>
+    <li>DC: ≤ 60 V</li>
+    <li><strong>Fehlerschutz kann entfallen bis:</strong></li>
+    <li>AC: ≤ 50 V</li>
+    <li>DC: ≤ 120 V</li>
+    <li>SELV = Safety Extra Low Voltage – galvanisch vom Netz getrennt, nicht geerdet</li>
+  </ul>` },
+
+  // VDE – NETZSYSTEME
+  { cat: "VDE Grundlagen", mc: ["1. Buchstabe = Anlagenerdung: T = geerdet, N = Neutralleiter. 2. Buchstabe = Trafoerdung","1. Buchstabe = Spannungsebene: T = Transformator, I = Invertiert. 2. Buchstabe = Schutzklasse","1. Buchstabe = Netzform: T = Trafo direkt geerdet, I = Inselanlage. Gibt Anlagenerdung an"], q: "Was bedeutet der erste Buchstabe in der Netzsystembezeichnung (z.B. TN, TT, IT)?", a: `<ul>
+    <li>Der erste Buchstabe beschreibt das <strong>Erdungsverhältnis am Trafo / an der Spannungsquelle</strong></li>
+    <li><strong>T</strong> = Terra – der Trafo ist im Sternpunkt geerdet</li>
+    <li><strong>I</strong> = Isoliert – der Trafo ist im Sternpunkt isoliert (nicht geerdet)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["2. Buchstabe gibt Spannungsniveau an: T = Tiefspannung, N = Niederspannung","2. Buchstabe gibt Schutzklasse der Betriebsmittel an: T = SK I, N = SK II","2. Buchstabe gibt Trafoerdung an: T = geerdet, N = über Neutralleiter verbunden"], q: "Was bedeutet der zweite Buchstabe in der Netzsystembezeichnung?", a: `<ul>
+    <li>Der zweite Buchstabe beschreibt, <strong>wie die Anlage / das Betriebsmittel geerdet ist</strong></li>
+    <li><strong>T</strong> = Terra – die Anlage ist direkt über einen eigenen Anlagenerder geerdet</li>
+    <li><strong>N</strong> = Neutral – die Anlage ist über den Neutralleiter (N) geerdet</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Beim IT-System: C = Combined (PE+N getrennt), S = Separated (PE+N gemeinsam)","Beim TT-System: C = Combined (PEN-Leiter gemeinsam), S = Separated (getrennte Leiter)","Beim TN-System: C = Controlled (geregelt), S = Switched (geschaltet)"], q: "Bei welchem Netzsystem wird ein dritter Buchstabe verwendet und was bedeutet er?", a: `<ul>
+    <li>Beim <strong>TN-System</strong> gibt es einen dritten Buchstaben</li>
+    <li><strong>C</strong> = Combined – PE und N werden als gemeinsamer <strong>PEN-Leiter</strong> geführt → TN-C-System</li>
+    <li><strong>S</strong> = Separated – PE und N werden als <strong>getrennte Leiter</strong> geführt → TN-S-System</li>
+    <li>TN-C-S: kombiniert, PEN wird ab einem Punkt aufgeteilt</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Im TT-Netz wird Schutz durch Leitungsschutzschalter Typ C sichergestellt. Formel: R_A = U_0 / I_N","Im TT-Netz reichen Schmelzsicherungen aus. Formel: R_A = I_ΔN / U_L","Im TT-Netz wird Schutz durch Überspannungsableiter Typ 2 sichergestellt. Formel: R_A = U_L × I_ΔN"], q: "Warum wird im TT-Netz der Schutz durch automatische Abschaltung üblicherweise mit einem RCD realisiert? Wie lautet die Formel für R_A?", a: `<ul>
+    <li>Im TT-Netz sind Trafo-Erde (R_B) und Anlagenerde (R_A) getrennt</li>
+    <li>Der hohe Anlagenerder-Widerstand R_A verhindert, dass Überstromschutzeinrichtungen schnell genug abschalten</li>
+    <li>Deshalb wird ein <strong>RCD (Fehlerstromschutzschalter)</strong> eingesetzt</li>
+    <div class="formula">R_A = U_L / I_ΔN</div>
+    <li>U_L = Berührungsspannung (50 V), I_ΔN = Nennfehlerstrom des RCD</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Ein RCD erkennt keinen Erdschluss und keine Körperschlüsse – er misst nur Spannungen","Ein RCD erkennt keine Phasenausfälle und keine Unterspannung im Netz","Ein RCD erkennt keine Isolationsfehler und kann kein Herzkammerflimmern verhindern"], q: "Was erkennt ein Fehlerstrom-Schutzschalter (RCD) NICHT?", a: `<ul>
+    <li>Ein RCD vergleicht über den Summenstromwandler nur die ein- und ausgehenden Ströme</li>
+    <li>Er erkennt <strong>keine Überlast</strong></li>
+    <li>Er erkennt <strong>keine Überspannung</strong></li>
+    <li>Er erkennt <strong>keinen Kurzschluss</strong> (ohne gleichzeitigen Erdschluss)</li>
+    <li>→ RCD schützt nur gegen Fehlerströme gegen Erde (Körperschluss)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["gG ≤50A: 5×I_N (0,4s) / 4×I_N (5s). Typ B: 3×I_N. Typ C: 5×I_N","gG ≤50A: 10×I_N (0,4s) / 6×I_N (5s). Typ B: 10×I_N. Typ C: 20×I_N","gG einheitlich: 8×I_N unabhängig von Stromstärke. Typ B und C: ebenfalls 8×I_N"], q: "Welche Auslösefaktoren gelten für Schmelzsicherungen Typ gG und Leitungsschutzschalter Typ B/C im TN-System?", a: `<ul>
+    <li><strong>Schmelzsicherung gG (≤ 0,4 s):</strong></li>
+    <li>≤ 50 A → 8 × I_N</li>
+    <li>&gt; 50 A → 10 × I_N</li>
+    <li><strong>Schmelzsicherung gG (≤ 5 s):</strong></li>
+    <li>≤ 40 A → 5 × I_N</li>
+    <li>&gt; 40 A → 6 × I_N</li>
+    <li><strong>Leitungsschutzschalter Typ B:</strong> 5 × I_N</li>
+    <li><strong>Leitungsschutzschalter Typ C:</strong> 10 × I_N</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["1,5→1,5 / 2,5→1,5 / 16→10 / 35→16 / 50→25 / 95→50 mm²","1,5→1,5 / 2,5→2,5 / 16→16 / 35→35 / 50→50 / 95→95 mm²","1,5→1,0 / 2,5→1,5 / 16→10 / 35→25 / 50→35 / 95→70 mm²"], q: "Welche Mindestquerschnitte gelten für den Schutzleiter (PE) in Abhängigkeit vom Außenleiterquerschnitt?", a: `<ul>
+    <li>1,5 mm² → PE: <strong>1,5 mm²</strong> (Mindest-Normquerschnitt)</li>
+    <li>2,5 mm² → PE: <strong>2,5 mm²</strong></li>
+    <li>16 mm² → PE: <strong>16 mm²</strong></li>
+    <li>35 mm² → PE: <strong>16 mm²</strong></li>
+    <li>50 mm² → PE: <strong>25 mm²</strong></li>
+    <li>95 mm² → PE: <strong>50 mm²</strong></li>
+    <li>Faustregel: bis 16 mm² = gleicher Querschnitt; darüber = halber Querschnitt (mind. 16 mm²)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["Typ A: nur sinusförmige AC-Fehlerströme. Typ B: nur glatte DC-Fehlerströme","Typ A: sinusförmige AC + pulsierende DC. Typ B: zusätzlich nur hochfrequente Wechselströme >1kHz","Typ A: alle Fehlerströme bis 30mA. Typ B: alle Fehlerströme bis 300mA"], q: "Auf welche Fehlerströme reagiert RCD Typ A und Typ B jeweils?", a: `<ul>
+    <li><strong>Typ A:</strong></li>
+    <li>Sinus-förmige Wechselströme (AC)</li>
+    <li>Pulsierende Gleichströme</li>
+    <li><strong>Typ B:</strong></li>
+    <li>Sinus-förmige Wechselströme (AC)</li>
+    <li>Pulsierende Gleichströme bis 1 kHz</li>
+    <li>Überlagerte glatte Gleichströme</li>
+    <li>→ Typ B erforderlich bei frequenzgesteuerten Geräten (Frequenzumrichter, E-Ladesäulen)</li>
+  </ul>` },
+  { cat: "VDE Grundlagen", mc: ["RCD und Überspannungsschutzgerät (ÜSS Typ 1 oder 2)","Leitungsschutzschalter und Schmelzsicherung (beide gleichzeitig)","FI-Schutzschalter und Trennschalter (manuell betätigt)"], q: "Welche zwei Schutzeinrichtungen verhindern im TN- und TT-System das Bestehenbleiben zu hoher Berührungsspannungen durch Abschalten?", a: `<ul>
+    <li><strong>RCD</strong> (Fehlerstromschutzschalter / FI-Schutzschalter)</li>
+    <li><strong>Überstromschutzeinrichtung</strong> (Leitungsschutzschalter oder Schmelzsicherung)</li>
+    <li>Im TN-System werden beide eingesetzt; im TT-System ist der RCD wegen hoher Erderwiderstände unerlässlich</li>
+  </ul>` },
+
+  // VOB – Vergabe- und Vertragsordnung für Bauleistungen
+  { cat: "VOB", mc: [
+    "VOB/A = Technische Bedingungen, VOB/B = Vergabe, VOB/C = Vertragsbedingungen",
+    "VOB/A = Vertragsbedingungen, VOB/B = Technische Bedingungen, VOB/C = Vergabe",
+    "VOB/A = Vergabe, VOB/B = Technische Bedingungen, VOB/C = Vertragsbedingungen"
+  ], q: "Nenne und erkläre die 3 Teile der VOB.", a: `<ul>
+    <li><strong>VOB/A – Allgemeine Bestimmungen für die Vergabe von Bauleistungen:</strong> Regelt das Verfahren zur Ausschreibung und Vergabe von Bauaufträgen. Gilt hauptsächlich für öffentliche Auftraggeber.</li>
+    <li><strong>VOB/B – Allgemeine Vertragsbedingungen für die Ausführung von Bauleistungen:</strong> Regelt Rechte und Pflichten beider Vertragsparteien – z. B. Abnahme, Mängelbeseitigung, Kündigung und Zahlungsfristen.</li>
+    <li><strong>VOB/C – Allgemeine Technische Vertragsbedingungen für Bauleistungen:</strong> Enthält technische Vorschriften für einzelne Gewerke (z. B. DIN 18382 für Elektro) und regelt Ausführung und Abrechnung.</li>
+    <li><em>Merksatz: A = Ausschreibung, B = Bedingungen, C = Craftwork (Technik)</em></li>
+  </ul>` },
+  { cat: "VOB", mc: [
+    "Förmliche Abnahme, Teilabnahme, Schlussabnahme",
+    "Schriftliche Abnahme, Mündliche Abnahme, Stillschweigende Abnahme",
+    "Förmliche Abnahme, Vorläufige Abnahme, Endabnahme"
+  ], q: "Nenne und erläutere die 3 Abnahmeformen nach VOB/B.", a: `<ul>
+    <li><strong>Förmliche Abnahme (§ 12 Abs. 4):</strong> Gemeinsame Begehung mit schriftlichem Abnahmeprotokoll. Mängel werden festgehalten. Sicherste Form für beide Seiten.</li>
+    <li><strong>Fiktive Abnahme (§ 12 Abs. 5):</strong> Auftragnehmer meldet Fertigstellung – reagiert der Auftraggeber 12 Werktage nicht, gilt die Leistung als abgenommen. Bei Inbenutzungnahme: 6 Werktage.</li>
+    <li><strong>Konkludente Abnahme:</strong> Durch schlüssiges Verhalten, z. B. Bezahlung der Schlussrechnung ohne Vorbehalt oder Einzug ins fertige Gebäude.</li>
+  </ul>` },
+  { cat: "VOB", mc: [
+    "Die VOB gilt automatisch für alle Bauverträge in Deutschland.",
+    "Die VOB muss vom Auftraggeber beim Bauamt angemeldet werden.",
+    "Die VOB gilt nur für öffentliche Auftraggeber ohne gesonderte Vereinbarung."
+  ], q: "Wie kann die VOB wirksam vereinbart werden?", a: `<ul>
+    <li><strong>B2B (Unternehmer):</strong> Einfacher Hinweis im Vertrag reicht: „Es gilt die VOB in der aktuellen Fassung."</li>
+    <li><strong>B2C (Verbraucher):</strong> Die VOB/B muss dem Verbraucher vor Vertragsabschluss vollständig ausgehändigt werden.</li>
+    <li><strong>Wichtig:</strong> Wird die VOB/B inhaltlich verändert, verliert sie ihren Sonderstatus und wird wie normale AGB nach BGB behandelt.</li>
+  </ul>` },
+  { cat: "VOB", mc: [
+    "Mängelhaftung 2 Jahre, keine Abschlagszahlungen, Nachträge formlos möglich",
+    "Mängelhaftung 5 Jahre, Abnahme immer schriftlich, Behinderungen mündlich melden",
+    "Mängelhaftung 10 Jahre, Zahlungsfristen nach BGB, Kündigung nur durch Gericht"
+  ], q: "Welche praktischen Folgen hat die VOB für die Auftragsabwicklung?", a: `<ul>
+    <li><strong>Abnahme:</strong> Förmliche Abnahme mit Protokoll anstreben – schützt beide Seiten.</li>
+    <li><strong>Mängelhaftung:</strong> Verjährungsfrist 4 Jahre (statt 5 Jahre nach BGB).</li>
+    <li><strong>Abschlagszahlungen:</strong> Möglich und geregelt nach § 16 VOB/B.</li>
+    <li><strong>Nachträge:</strong> Mehrleistungen schriftlich und vor Ausführung vereinbaren.</li>
+    <li><strong>Behinderungen:</strong> Müssen unverzüglich schriftlich angezeigt werden.</li>
+  </ul>` },
+  { cat: "VOB", mc: [
+    "Rot = Abnahme unter Vorbehalt, Gelb = Vorbehaltslose Abnahme, Grün = Abnahmeverweigerung",
+    "Rot = Vorbehaltslose Abnahme, Gelb = Abnahmeverweigerung, Grün = Abnahme unter Vorbehalt",
+    "Rot = Teilabnahme, Gelb = Abnahmeverweigerung, Grün = Abnahme unter Vorbehalt"
+  ], q: "Welche 3 Abnahmebefunde gibt es und was bedeuten sie?", a: `<ul>
+    <li>🔴 <strong>Abnahmeverweigerung – wesentliche Mängel:</strong> Leistung ist nicht vertragsgerecht nutzbar. Keine Abnahme, keine Zahlungspflicht, Nachbesserung erforderlich.</li>
+    <li>🟡 <strong>Abnahme unter Vorbehalt – unwesentliche Mängel:</strong> Abnahme erfolgt, Mängel werden im Protokoll festgehalten. Auftraggeber kann Teil der Vergütung einbehalten. Gewährleistungsfrist beginnt.</li>
+    <li>🟢 <strong>Vorbehaltslose Abnahme – keinerlei Mängel:</strong> Leistung vollständig und vertragsgerecht. Volle Zahlungspflicht, Gewährleistungsfrist beginnt, Gefahr geht über.</li>
+  </ul>` },
+
+  // VDE – BLITZSCHUTZ (KLAUSUR 3 THEMEN)
+  { cat: "Blitzschutz", q: "Was muss als Errichter der elektrischen Anlage beachtet werden, um die Wirksamkeit des inneren Blitzschutzsystems sicherzustellen?", a: `<ul>
+    <li>Richtige Reihenfolge einhalten: <strong>Typ 1 → Typ 2 → Typ 3</strong></li>
+    <li>Typ 1: vom ungeschützten in den geschützten Bereich (LPZ 0 → LPZ 1)</li>
+    <li>Typ 2/3: innerhalb der geschützten Bereiche</li>
+    <li>Trennabstände zu anderen Leitungen einhalten</li>
+    <li>Anschlussleitungen so kurz wie möglich halten (max. 0,5 m, ca. 1 kV/m)</li>
+  </ul>` },
+  { cat: "Blitzschutz", q: "Was ist beim Fundamenterder ohne äußeres Blitzschutzsystem hinsichtlich Material zu beachten?", a: `<ul>
+    <li>Im Beton eingebetteter Teil: <strong>nicht korrosionsbeständig</strong> – muss mindestens 5 cm vom Beton umschlossen sein (Stahl)</li>
+    <li>Außerhalb des Betons / an Erdreich grenzend: <strong>korrosionsbeständiges Material</strong> erforderlich (z.B. V4A-Edelstahl)</li>
+    <li>Anschlussfahne: Ausführung in V4A (korrosionsbeständig)</li>
+    <li>Verbindungen: Schweiß-, Klemm-, Schraub- oder Pressverbinder – kein Rödeldraht!</li>
+  </ul>` },
+  { cat: "Blitzschutz", q: "Welche Faktoren sind bei der Anschlusslänge eines Blitzstromableiters (Typ 1) zu beachten und welche Anschlussart wird empfohlen?", a: `<ul>
+    <li>Anschlusslänge: <strong>max. 0,5 m</strong> (entspricht ca. 1 kV/m induzierter Spannung)</li>
+    <li>Querschnitt: mindestens <strong>16 mm²</strong></li>
+    <li>In der Nähe dürfen sich keine anderen Leitungen befinden (Trennabstand)</li>
+    <li>Empfohlene Anschlussart: <strong>V-Verdrahtung</strong> oder als Stich</li>
+  </ul>` },
+  { cat: "Blitzschutz", q: "Welche vier häufigen Montagefehler passieren bei der Installation von Überspannungsableitern?", a: `<ul>
+    <li>1. <strong>Falsche Reihenfolge</strong> (Kaskadierung nicht eingehalten: Typ 1 → 2 → 3)</li>
+    <li>2. <strong>Falsche Querschnitte</strong> der Anschlussleitungen</li>
+    <li>3. <strong>Zu lange Leitungen</strong> (Anschlussleitungen > 0,5 m)</li>
+    <li>4. <strong>Falsche Position</strong> (nicht am richtigen LPZ-Übergang)</li>
+    <li>5. <strong>Trennabstände nicht eingehalten</strong> (zu andere Leitungen)</li>
+    <li>6. PA/PE-Anschluss fehlt</li>
+  </ul>` },
+  { cat: "Blitzschutz", q: "Welchen Mindestquerschnitt müssen Leitungen beim Blitzstrom-Potentialausgleich haben?", a: `<ul>
+    <li>Mindestquerschnitt: <strong>16 mm²</strong> (Kupfer)</li>
+    <li>Gilt für alle Verbindungen im Blitzstrom-Potentialausgleich</li>
+    <li>Beim äußeren Blitzschutz (Fangeinrichtung → Ableiter) gelten höhere Anforderungen</li>
+  </ul>` },
+  { cat: "Blitzschutz", q: "Badezimmer: Spiegelschrank mit Steckdose, 170 cm Höhe, 49 cm Abstand zur Badewanne – zulässig?", a: `<ul>
+    <li><strong>Nicht zulässig!</strong></li>
+    <li>Bereich 2 beginnt 60 cm seitlich neben der Badewanne/Dusche</li>
+    <li>49 cm Abstand liegt innerhalb von <strong>Bereich 2</strong> – dort sind Steckdosen nicht erlaubt</li>
+    <li>Lösungen: Steckdose außerhalb des Bereichs versetzen oder Schutztrennung (Trenntrafo) verwenden</li>
+  </ul>` },
+
+  // BETRIEBSFÜHRUNG – Auftragsabwicklung (Karteikarten)
+  { cat: "Betriebsführung", q: "Nenne die 8 Schritte der Auftragsabwicklung in der richtigen Reihenfolge.", a: `<ul>
+    <li><strong>1.</strong> Kundenanfrage</li>
+    <li><strong>2.</strong> Angebot erstellen</li>
+    <li><strong>3.</strong> Auftragserteilung / Vertragsabschluss</li>
+    <li><strong>4.</strong> Arbeitsvorbereitung / Planung</li>
+    <li><strong>5.</strong> Materialbeschaffung</li>
+    <li><strong>6.</strong> Auftragsausführung</li>
+    <li><strong>7.</strong> Abnahme / Qualitätskontrolle</li>
+    <li><strong>8.</strong> Rechnungsstellung</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "Was ist der Unterschied zwischen Kundenanfrage und Auftragserteilung?", a: `<ul>
+    <li>Die <strong>Anfrage</strong> ist unverbindlich.</li>
+    <li>Der <strong>Vertrag</strong> kommt erst mit der Auftragserteilung zustande, wenn der Kunde das Angebot annimmt.</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "Warum kommt die Arbeitsvorbereitung vor der Materialbeschaffung?", a: `<ul>
+    <li>Erst in der Planung wird festgelegt, welche Materialien in welcher Menge und zu welchem Zeitpunkt benötigt werden.</li>
+    <li>Ohne diese Planung kann nicht zielgerichtet bestellt werden.</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "Welche zwei rechtlichen Folgen hat die Abnahme?", a: `<ul>
+    <li>Die <strong>Gefahr geht auf den Kunden über</strong>.</li>
+    <li>Die <strong>Gewährleistungsfrist beginnt</strong> zu laufen.</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "Warum darf die Schlussrechnung erst nach der Abnahme gestellt werden?", a: `<ul>
+    <li>Weil die Leistung erst mit der Abnahme als vollständig erbracht gilt.</li>
+    <li>Erst dann entsteht der vollständige Zahlungsanspruch.</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "Was passiert, wenn bei der Abnahme Mängel festgestellt werden?", a: `<ul>
+    <li>Der Betrieb ist zur <strong>Nachbesserung verpflichtet</strong>.</li>
+    <li>Die Abnahme gilt erst nach erfolgreicher Mängelbeseitigung als abgeschlossen.</li>
+  </ul>` },
+  { cat: "Betriebsführung", q: "In welche 3 Phasen lässt sich die Auftragsabwicklung grob einteilen?", a: `<ul>
+    <li><strong>1.</strong> Auftragsgewinnung</li>
+    <li><strong>2.</strong> Auftragsdurchführung</li>
+    <li><strong>3.</strong> Auftragsnachbereitung</li>
+  </ul>` },
+
+  // VOB – Karteikarten (Vorderseite / Rückseite)
+  { cat: "VOB", q: "Wofür steht VOB/A und was regelt dieser Teil?", a: `<ul>
+    <li><strong>A = Allgemeine Bestimmungen für die Vergabe von Bauleistungen</strong></li>
+    <li>Regelt das Verfahren zur Ausschreibung und Vergabe von Bauaufträgen.</li>
+    <li>Gilt hauptsächlich für öffentliche Auftraggeber (Bund, Länder, Kommunen).</li>
+  </ul>` },
+  { cat: "VOB", q: "Wofür steht VOB/B und was regelt dieser Teil?", a: `<ul>
+    <li><strong>B = Allgemeine Vertragsbedingungen für die Ausführung von Bauleistungen</strong></li>
+    <li>Regelt Rechte und Pflichten beider Vertragsparteien.</li>
+    <li>Themen: Abnahme, Mängelbeseitigung, Kündigung, Zahlungsfristen, Vergütung.</li>
+    <li>Prüfungsrelevantester Teil der VOB.</li>
+  </ul>` },
+  { cat: "VOB", q: "Wofür steht VOB/C und was regelt dieser Teil?", a: `<ul>
+    <li><strong>C = Allgemeine Technische Vertragsbedingungen für Bauleistungen</strong></li>
+    <li>Enthält technische Vorschriften für einzelne Gewerke.</li>
+    <li>Beispiel: DIN 18382 für Elektroinstallationen.</li>
+    <li>Regelt wie Leistungen auszuführen und abzurechnen sind.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was ist die förmliche Abnahme nach VOB/B?", a: `<ul>
+    <li>Gemeinsame Begehung des Werks durch beide Vertragsparteien.</li>
+    <li>Ergebnis wird in einem schriftlichen <strong>Abnahmeprotokoll</strong> festgehalten.</li>
+    <li>Mängel werden dokumentiert.</li>
+    <li>Sicherste und empfohlene Abnahmeform für beide Seiten.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was ist die fiktive Abnahme nach VOB/B und wann tritt sie ein?", a: `<ul>
+    <li>Tritt ein ohne ausdrückliche Erklärung des Auftraggebers.</li>
+    <li>Nach Fertigstellungsmeldung: Keine Reaktion des Auftraggebers binnen <strong>12 Werktagen</strong> → Abnahme gilt als erfolgt.</li>
+    <li>Bei Inbenutzungnahme: Abnahme gilt nach <strong>6 Werktagen</strong>.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was ist die konkludente Abnahme?", a: `<ul>
+    <li>Abnahme durch <strong>schlüssiges Verhalten</strong> ohne ausdrückliche Erklärung.</li>
+    <li>Beispiele: Bezahlung der Schlussrechnung ohne Vorbehalt, Einzug ins fertige Gebäude.</li>
+    <li>Kein Protokoll, aber rechtlich wirksam.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was bedeutet Abnahmeverweigerung und wann ist sie zulässig?", a: `<ul>
+    <li>Der Auftraggeber <strong>verweigert die Abnahme</strong> wegen wesentlicher Mängel.</li>
+    <li>Wesentlich = Leistung ist nicht vertragsgerecht nutzbar.</li>
+    <li>Folge: Keine Abnahme, keine Zahlungspflicht, Nachbesserungspflicht des Auftragnehmers.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was bedeutet Abnahme unter Vorbehalt?", a: `<ul>
+    <li>Abnahme erfolgt trotz <strong>unwesentlicher Mängel</strong>.</li>
+    <li>Mängel werden im Abnahmeprotokoll festgehalten.</li>
+    <li>Auftraggeber kann einen Teil der Vergütung einbehalten.</li>
+    <li>Gewährleistungsfrist beginnt trotzdem zu laufen.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was bedeutet vorbehaltslose Abnahme?", a: `<ul>
+    <li>Leistung ist vollständig und <strong>keinerlei Mängel</strong> vorhanden.</li>
+    <li>Volle Zahlungspflicht entsteht.</li>
+    <li>Gewährleistungsfrist beginnt zu laufen.</li>
+    <li>Gefahr geht auf den Auftraggeber über.</li>
+  </ul>` },
+  { cat: "VOB", q: "Wie wird die VOB zwischen zwei Unternehmern (B2B) wirksam vereinbart?", a: `<ul>
+    <li>Ein einfacher Hinweis im Vertrag reicht:</li>
+    <li><em>„Es gilt die VOB in der aktuellen Fassung."</em></li>
+    <li>Der andere Unternehmer muss die Möglichkeit haben, sie einzusehen.</li>
+  </ul>` },
+  { cat: "VOB", q: "Wie wird die VOB mit einem Verbraucher (B2C) wirksam vereinbart?", a: `<ul>
+    <li>Die VOB/B muss dem Verbraucher <strong>vor Vertragsabschluss vollständig ausgehändigt</strong> werden.</li>
+    <li>Nur so kann er sie zur Kenntnis nehmen.</li>
+    <li>Ohne Aushändigung ist die VOB nicht wirksam einbezogen.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was passiert, wenn die VOB/B inhaltlich verändert wird?", a: `<ul>
+    <li>Sie verliert ihren <strong>Sonderstatus</strong>.</li>
+    <li>Wird dann wie normale AGB nach BGB behandelt.</li>
+    <li>Das kann für den Auftragnehmer nachteilig sein.</li>
+  </ul>` },
+  { cat: "VOB", q: "Wie lang ist die Mängelhaftungsfrist nach VOB im Vergleich zum BGB?", a: `<ul>
+    <li>VOB: <strong>4 Jahre</strong></li>
+    <li>BGB: <strong>5 Jahre</strong></li>
+    <li>Die VOB verkürzt also die Gewährleistungsfrist zugunsten des Auftragnehmers.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was muss bei Behinderungen auf der Baustelle nach VOB beachtet werden?", a: `<ul>
+    <li>Behinderungen müssen <strong>unverzüglich und schriftlich</strong> angezeigt werden.</li>
+    <li>Nur dann können Fristverlängerungen oder Mehrkosten geltend gemacht werden.</li>
+  </ul>` },
+  { cat: "VOB", q: "Was gilt für Nachträge (Mehrleistungen) nach VOB?", a: `<ul>
+    <li>Mehrleistungen müssen <strong>schriftlich und vor der Ausführung</strong> vereinbart werden.</li>
+    <li>Mündliche Nachtragsvereinbarungen sind schwer durchsetzbar.</li>
+  </ul>` },
+  // ═══════════════════════════════════════════════════════════════
+// BETRIEBSFÜHRUNG – Neue Lernkarten mit Multiple Choice
+// Einfügen vor der letzten Zeile:  ];  (Ende von ALL_CARDS)
+// ═══════════════════════════════════════════════════════════════
+
+  // ── SELBSTKOSTEN & GEWINN ──────────────────────────────────────
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Selbstkosten = nur Materialkosten + Fremdleistungen, ohne Personalkosten",
+      "Selbstkosten = Verkaufspreis minus Gewinnaufschlag des Unternehmens",
+      "Selbstkosten = nur fixe Kosten wie Miete und Versicherung, ohne variable Kosten"
+    ],
+    q: "Was sind Selbstkosten und warum sind sie für die Kalkulation wichtig?",
+    a: `<ul>
+      <li>Selbstkosten = <strong>alle Kosten</strong> bei der Produktion von Gütern und Dienstleistungen</li>
+      <li>Ermittelt über die Selbstkostenrechnung – Grundlage der betrieblichen Kalkulation</li>
+      <li>Beispiele: Personalkosten, Materialkosten, Energiekosten, Fahrtkosten</li>
+      <li>Erst mit bekannten Selbstkosten kann ein sinnvoller Verkaufspreis festgelegt werden</li>
+      <li>Ohne genaue Selbstkostenermittlung riskiert das Unternehmen Aufträge unter Einstandspreis</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Der Gewinn ist unwichtig – entscheidend ist nur der Umsatz und die Marktposition",
+      "Zu hoher Gewinn ist immer gut – er zeigt Stärke und schreckt Konkurrenten ab",
+      "Der Gewinn sollte möglichst niedrig angesetzt werden um Steuern zu sparen"
+    ],
+    q: "Warum ist die Höhe des festgesetzten Gewinns in der Kalkulation von großer Bedeutung?",
+    a: `<ul>
+      <li>Gewinn bestimmt direkt den <strong>Verkaufspreis</strong> (Selbstkosten + Gewinn = Angebotspreis)</li>
+      <li>Entscheidet ob das Unternehmen profitabel arbeitet und langfristig bestehen kann</li>
+      <li><strong>Zu hoher Gewinn:</strong> Preise nicht mehr konkurrenzfähig → Kunden wechseln zur Konkurrenz</li>
+      <li><strong>Zu niedriger Gewinn:</strong> Kosten kaum gedeckt, Investitionen und Zukunft gefährdet</li>
+      <li>Gewinn ist wichtig für Investitionen, Wachstum und finanzielle Stabilität</li>
+    </ul>`
+  },
+
+  // ── NACHKALKULATION ────────────────────────────────────────────
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Nachkalkulation = Kostenplanung vor Auftragsstart zur Angebotserstellung",
+      "Nachkalkulation = Kalkulation die nur bei Verlustprojekten durchgeführt wird",
+      "Nachkalkulation = Schätzung der zukünftigen Kosten auf Basis ähnlicher Projekte"
+    ],
+    q: "Was ist die Nachkalkulation und warum muss sie durchgeführt werden?",
+    a: `<ul>
+      <li>Nachkalkulation = Kostenrechnung <strong>nach Abschluss</strong> eines Auftrags</li>
+      <li>Vergleicht tatsächliche Istkosten mit den geplanten Kosten der Vorkalkulation</li>
+      <li>Pflicht zur Kostenkontrolle und betriebswirtschaftlichen Steuerung</li>
+      <li>Grundlage für zukünftige Angebote und präzisere Kalkulationen</li>
+      <li>Nachweis gegenüber Auftraggeber (z.B. bei Nachträgen)</li>
+      <li>Erkennung von Fehlern in der Vorkalkulation</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Ziel ist ausschließlich die steuerliche Dokumentation der Projektkosten",
+      "Ziel ist die Überprüfung der Mitarbeiterleistung und Lohnabrechnung",
+      "Ziel ist die Planung des nächsten Projekts ohne Bezug zum abgeschlossenen Auftrag"
+    ],
+    q: "Was sind die Ziele der Nachkalkulation?",
+    a: `<ul>
+      <li>Feststellung ob ein Auftrag <strong>gewinnbringend oder verlustreich</strong> war</li>
+      <li>Verbesserung künftiger Kalkulationen durch Lernen aus Abweichungen</li>
+      <li>Aufdeckung von Kostentreibern und Ineffizienzen im Betrieb</li>
+      <li>Sicherstellung der <strong>langfristigen Rentabilität</strong> des Unternehmens</li>
+      <li>Basis für präzisere Angebote und bessere Wettbewerbsfähigkeit</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "1. Angebot erstellen → 2. Auftrag annehmen → 3. Kosten schätzen → 4. Abrechnen",
+      "1. Plankosten festlegen → 2. Auftrag durchführen → 3. Rechnung stellen → 4. Archivieren",
+      "1. Istkosten erfassen → 2. mit Plankosten vergleichen → 3. Abweichungen ermitteln – ohne weitere Schritte"
+    ],
+    q: "Beschreiben Sie den Ablauf einer Nachkalkulation in Schritten.",
+    a: `<ul>
+      <li><strong>1.</strong> Erfassung aller tatsächlichen Istkosten (Material, Lohn, Fremdleistungen)</li>
+      <li><strong>2.</strong> Gegenüberstellung mit den Plankosten der Vorkalkulation</li>
+      <li><strong>3.</strong> Ermittlung der Abweichungen (positiv/negativ)</li>
+      <li><strong>4.</strong> Analyse der Ursachen für Abweichungen</li>
+      <li><strong>5.</strong> Dokumentation und Archivierung</li>
+      <li><strong>6.</strong> Ableitung von Maßnahmen für künftige Projekte</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Hauptursache ist immer der Auftraggeber durch unklare Leistungsbeschreibungen",
+      "Abweichungen entstehen nur durch Fehler der Mitarbeiter auf der Baustelle",
+      "Abweichungen entstehen ausschließlich durch Materialpreissteigerungen am Markt"
+    ],
+    q: "Nennen Sie typische Ursachen für Abweichungen in der Nachkalkulation.",
+    a: `<ul>
+      <li><strong>Material:</strong> Preissteigerungen, Verschnitt, Fehlmengen</li>
+      <li><strong>Lohn:</strong> Mehr-/Überstunden, Krankenstand, falsche Zeitschätzung</li>
+      <li><strong>Fremdleistungen:</strong> Nachunternehmer teurer als geplant</li>
+      <li><strong>Planung:</strong> Fehler in Vorkalkulation, unvollständige Leistungsbeschreibung</li>
+      <li><strong>Bauablauf:</strong> Störungen, Behinderungen, Schlechtwetter</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Konsequenz ist immer eine Preiserhöhung beim nächsten Angebot um 10%",
+      "Bei Überschreitung wird der Auftrag storniert, bei Unterschreitung keine Maßnahme nötig",
+      "Konsequenzen betreffen nur die steuerliche Bewertung – keine betrieblichen Maßnahmen"
+    ],
+    q: "Welche Konsequenzen zieht man aus der Nachkalkulation und wer ist verantwortlich?",
+    a: `<ul>
+      <li><strong>Kostenüberschreitung:</strong> Ursachenanalyse, Kalkulationsgrundlagen anpassen, ggf. Nachtragsstellung</li>
+      <li><strong>Kostenunterschreitung:</strong> Prüfen ob Qualitätsabstriche gemacht wurden, als Best Practice nutzen</li>
+      <li>Langfristig: Einheitspreise, Lohnansätze und Gemeinkostenzuschläge anpassen</li>
+      <li><strong>Verantwortlich:</strong> Kalkulator / Projektleiter / kaufmännische Abteilung</li>
+      <li><strong>Unterlagen:</strong> Stundenzettel, Materiallieferscheine, Subunternehmerrechnungen</li>
+    </ul>`
+  },
+
+  // ── FAHRZEUGKOSTENVERGLEICH ────────────────────────────────────
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Gesamtkosten = Anschaffungspreis + Betriebskosten × 5 Jahre (Restwert wird nicht abgezogen)",
+      "Gesamtkosten = nur Betriebskosten × 5 Jahre, Anschaffung ist Einmalinvestition ohne Einfluss",
+      "Gesamtkosten = Anschaffungspreis ÷ 5 Jahre + jährliche Betriebskosten (kein Restwert)"
+    ],
+    q: "Wie berechnet man die Gesamtkosten eines Fahrzeugs über 5 Jahre für einen Investitionsvergleich?",
+    a: `<ul>
+      <li><strong>Netto-Anschaffung</strong> = Kaufpreis − Förderung/Rabatte</li>
+      <li><strong>Betriebskosten 5 J.</strong> = (Kraftstoff + Wartung + Versicherung + Steuer) × 5</li>
+      <li><strong>Gesamtkosten</strong> = Netto-Anschaffung + Betriebskosten 5 J. − Restwert</li>
+      <li><strong>Kosten/km</strong> = Gesamtkosten ÷ Gesamtfahrleistung (km über 5 Jahre)</li>
+      <li>Qualitative Kriterien: Reichweite/Ladeinfrastruktur, Umwelt/Image</li>
+    </ul>`
+  },
+
+  // ── GEWINN – BETRIEBLICHE BEDEUTUNG ───────────────────────────
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Gewinn ist optional – ein Unternehmen kann dauerhaft mit Verlust arbeiten wenn der Umsatz stimmt",
+      "Gewinn ist nur für Aktiengesellschaften relevant – Handwerksbetriebe brauchen keinen Gewinn",
+      "Gewinn entsteht automatisch wenn der Umsatz hoch genug ist – Kostenkontrolle ist zweitrangig"
+    ],
+    q: "Warum ist Gewinn eine betriebliche Notwendigkeit?",
+    a: `<ul>
+      <li>Ohne Gewinn keine <strong>Kredittilgung</strong> und keine Zinszahlung möglich</li>
+      <li>Kein Eigenkapitalaufbau → keine Kreditwürdigkeit bei Banken</li>
+      <li>Gewinn dient als <strong>Puffer für Verlustjahre</strong> und wirtschaftliche Krisen</li>
+      <li>Sichert Liquidität und ist Voraussetzung für den Fortbestand des Unternehmens</li>
+      <li>Nur gewinnbringende Unternehmen können langfristig investieren und wachsen</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Fiktiver Kundenzuschlag der in Rechnung gestellt wird um Mehrwertsteuer zu vermeiden",
+      "Der tatsächlich ausgezahlte Lohn des Unternehmers der als Betriebsausgabe verbucht wird",
+      "Staatliche Förderung für Selbstständige die keinen festen Lohn beziehen können"
+    ],
+    q: "Was ist der kalkulatorische Unternehmerlohn und warum wird er angesetzt?",
+    a: `<ul>
+      <li>Fiktiver Lohn für die <strong>eigene Arbeitsleistung des Inhabers</strong> in der Kalkulation</li>
+      <li>Ohne ihn entsteht ein <strong>Scheingewinn</strong> – die Arbeitsleistung wird verschenkt</li>
+      <li>Entspricht dem Gehalt einer vergleichbaren Angestelltenposition am Markt</li>
+      <li>Besonders wichtig bei <strong>Einzelunternehmen und Personengesellschaften</strong></li>
+      <li>Beispiel: Meisterbetrieb – Inhaber als Bauleiter → kalkulatorischer Lohn = 4.500 €/Monat</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Gewinn dient nur zur Ausschüttung an Gesellschafter – Investitionen werden über Kredite finanziert",
+      "Gewinn ist für die Zukunft irrelevant – wichtiger ist die kurzfristige Liquidität",
+      "Gewinn sollte vollständig als Rücklage gehalten werden – Investitionen mindern den Gewinn unnötig"
+    ],
+    q: "Welche Rolle spielt Gewinn für die Zukunftssicherung eines Unternehmens?",
+    a: `<ul>
+      <li><strong>Investitionen</strong> in neue Maschinen, Fahrzeuge und Technologien</li>
+      <li><strong>Eigenkapitalaufbau</strong> → Unabhängigkeit von Fremdkapital und Banken</li>
+      <li><strong>Risikovorsorge</strong> für Forderungsausfälle und Konjunkturabschwünge</li>
+      <li><strong>Altersvorsorge</strong> des Unternehmers (besonders bei Selbstständigen)</li>
+      <li><strong>Wachstum</strong> durch neue Märkte oder Personalaufbau</li>
+      <li>Ohne ausreichenden Gewinn keine Innovation → langfristiger Verlust der Wettbewerbsfähigkeit</li>
+    </ul>`
+  },
+  // ═══════════════════════════════════════════════════════════════
+// BETRIEBSFÜHRUNG – Baustellenbetrachtung: Sonderfall Fußgängerzone
+// Einfügen vor der letzten Zeile:  ];  (Ende von ALL_CARDS)
+// ═══════════════════════════════════════════════════════════════
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Fußgängerzone wird für die Bauzeit vollständig gesperrt – kein Durchgang möglich",
+      "Nur Lieferverkehr muss gesichert werden – Fußgänger weichen auf Umleitungen aus",
+      "Rettungswege werden für die Baudauer offiziell verlegt – kein Zugang nötig"
+    ],
+    q: "Welche besonderen Herausforderungen gibt es bei der Zugänglichkeit einer Baustelle in der Fußgängerzone?",
+    a: `<ul>
+      <li><strong>Fußgängerverkehr:</strong> Zone bleibt meist geöffnet – Zugang zu Geschäften und Wohngebäuden muss jederzeit sichergestellt sein</li>
+      <li><strong>Baustellen-Logistik:</strong> Arbeiten erfolgen halbseitig oder in kleinen Abschnitten („wandernde Baustelle") um Durchgänge freizuhalten</li>
+      <li><strong>Lieferverkehr & Rettungswege:</strong> Zufahrten für Lieferverkehr und Rettungskräfte müssen trotz Absperrungen gewährleistet bleiben</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Großmaschinen werden zentral gelagert – Platz ist in der Fußgängerzone ausreichend vorhanden",
+      "Müllabfuhr erfolgt wie gewohnt – keine besonderen Logistiklösungen nötig",
+      "Gewerke arbeiten streng nacheinander – parallele Leistungserbringung ist verboten"
+    ],
+    q: "Welche besonderen logistischen Herausforderungen gibt es bei einer Baustelle in der Fußgängerzone?",
+    a: `<ul>
+      <li><strong>Arbeiten auf engstem Raum:</strong> Platz für Maschinen, Materiallagerung und Container ist stark begrenzt</li>
+      <li><strong>Ver- und Entsorgung:</strong> Müllabfuhr für Anlieger wird über Logistiklösungen organisiert (z.B. Sammelplätze am Baufeldrand)</li>
+      <li><strong>Absprachen zwischen den Gewerken:</strong> Oft werden parallel Leistungen erbracht (z.B. Leitungs- und Rohrverlegung) – enge Koordination nötig</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Lärmschutz gilt nur nachts – tagsüber gelten dieselben Regelungen wie auf normalen Baustellen",
+      "Erschütterungen sind in Fußgängerzonen unkritisch – historische Gebäude sind ausreichend geschützt",
+      "Einzelhandel muss Baustellenlärm akzeptieren – keine besonderen Rücksichten erforderlich"
+    ],
+    q: "Welche Rücksichten müssen auf Einzelhandel und Wohnen bei Bauarbeiten in der Fußgängerzone genommen werden?",
+    a: `<ul>
+      <li><strong>Lärmschutz:</strong> Besonders laute Maschinen müssen oft früher ruhen (teils ab 17:00 Uhr) als auf normalen Baustellen um den Geschäftsbetrieb nicht zu stören</li>
+      <li><strong>Erschütterungen:</strong> Da oft in der Nähe historischer Gebäude gearbeitet wird, ist eine <strong>rüttelarme Arbeitsweise</strong> erforderlich</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Fußgängerzonen werden nur aus Kostengründen umgebaut – keine gestalterischen Ziele",
+      "Klimaschutz spielt keine Rolle – Bäume werden aus Platzmangel nicht gepflanzt",
+      "Neugestaltung dient ausschließlich der Verkehrsberuhigung – kein Mobiliar oder Begrünung"
+    ],
+    q: "Welche Zielsetzungen und Gestaltungsaspekte verfolgen Baumaßnahmen in Fußgängerzonen?",
+    a: `<ul>
+      <li><strong>Aufwertung:</strong> Neugestaltung für Barrierefreiheit, neue Oberflächen und bessere Beleuchtung</li>
+      <li><strong>Klimaschutz:</strong> Pflanzung neuer Bäume für Beschattung und Stadtklima</li>
+      <li><strong>Mobiliar:</strong> Einbau neuer Bänke, Spielstationen oder Trinkwasserbrunnen</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Großprojekte werden immer in einem Zug durchgeführt – phasenweise Umsetzung ist zu teuer",
+      "Bürgerbeteiligung findet nur nach Abschluss der Baumaßnahme statt – nicht in der Planung",
+      "Zeitliche Planung ist in Fußgängerzonen unwichtig – Baustellen dauern so lange wie nötig"
+    ],
+    q: "Welche zeitlichen Besonderheiten und Kommunikationsmaßnahmen sind bei Fußgängerzonen-Baustellen zu beachten?",
+    a: `<ul>
+      <li><strong>Phasenweise Umsetzung:</strong> Großprojekte werden in mehrere Bauabschnitte unterteilt die sich über mehrere Jahre erstrecken – um Beeinträchtigungen zu minimieren</li>
+      <li><strong>Bürgerbeteiligung:</strong> Anlieger und Bürger werden intensiv in die Planungsphase einbezogen</li>
+      <li>Frühzeitige Kommunikation reduziert Konflikte mit Anliegern und Einzelhändlern</li>
+    </ul>`
+  },
+
+  { cat: "Betriebsführung",
+    mc: [
+      "Fußgängerzonen unterscheiden sich nicht von normalen Baustellen – gleiche Regeln gelten überall",
+      "Nur der Lärmschutz ist anders – alle anderen Aspekte sind identisch mit normalen Baustellen",
+      "Fußgängerzonen erfordern weniger Planung – da kein Fahrzeugverkehr vorhanden ist"
+    ],
+    q: "Fassen Sie die wesentlichen Unterschiede einer Baustelle in der Fußgängerzone gegenüber einer normalen Baustelle zusammen.",
+    a: `<ul>
+      <li><strong>Zugänglichkeit:</strong> Durchgänge für Fußgänger, Lieferung und Rettung müssen immer gewährleistet sein</li>
+      <li><strong>Platzmangel:</strong> Enger Raum erfordert „wandernde Baustelle" und besondere Logistiklösungen</li>
+      <li><strong>Lärmschutz:</strong> Strengere Ruhezeiten (oft ab 17:00 Uhr) wegen Einzelhandel und Anwohnern</li>
+      <li><strong>Erschütterungen:</strong> Rüttelarme Arbeitsweise wegen historischer Bausubstanz</li>
+      <li><strong>Gestaltung:</strong> Oft verbunden mit Neugestaltung, Begrünung und Barrierefreiheit</li>
+      <li><strong>Kommunikation:</strong> Intensive Bürgerbeteiligung und phasenweise Umsetzung</li>
+    </ul>`
+  },
+
+// ═══════════════════════════════════════════════════════════════
+// ENDE – Diese Karten vor der schließenden ]; in ALL_CARDS einfügen
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// ENDE – Diese Karten vor der schließenden ]; in ALL_CARDS einfügen
+// ═══════════════════════════════════════════════════════════════
+];
+// @@CARDS_END
+
+const CATS = [...new Set(ALL_CARDS.map(c => c.cat))];
+let activeCats = new Set(CATS);
+let mode = 'all';
+let quizType = 'karte'; // 'karte' or 'mc'
+let deck = [];
+let idx = 0;
+let flipped = false;
+let stats = { right: 0, wrong: 0 };
+let wrongCards = [];
+let seenIds = new Set();
+
+function setQuizType(type) {
+  quizType = type;
+  document.getElementById('typeKarteBtn').style.cssText = `flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:9px;border-radius:10px;cursor:pointer;border:1px solid ${type==='karte'?'var(--accent)':'var(--border)'};background:${type==='karte'?'var(--accent)':'transparent'};color:${type==='karte'?'#000':'var(--muted)'};`;
+  document.getElementById('typeMCBtn').style.cssText = `flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:9px;border-radius:10px;cursor:pointer;border:1px solid ${type==='mc'?'var(--accent)':'var(--border)'};background:${type==='mc'?'var(--accent)':'transparent'};color:${type==='mc'?'#000':'var(--muted)'};`;
+  buildDeck();
+}
+
+// Extract a short plain-text label from HTML answer for MC options
+function extractLabel(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  const text = div.textContent || div.innerText || '';
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+  if (!lines.length) return text.slice(0, 80);
+  return lines[0].slice(0, 90) + (lines[0].length > 90 ? '…' : '');
+}
+
+// Get distractor labels: use mc array if available, else pick from same-category cards
+function getDistractorLabels(correct, pool) {
+  if (correct.mc && correct.mc.length >= 3) {
+    return shuffle([...correct.mc]).slice(0, 3);
+  }
+  const sameCat = pool.filter(c => c !== correct && c.cat === correct.cat);
+  const otherCat = pool.filter(c => c !== correct && c.cat !== correct.cat);
+  let candidates = shuffle([...sameCat]);
+  if (candidates.length < 3) candidates = [...candidates, ...shuffle(otherCat)];
+  return candidates.slice(0, 3).map(c => extractLabel(c.a));
+}
+
+function showMCOptions(card) {
+  const container = document.getElementById('mcOptions');
+  container.style.display = 'flex';
+  container.innerHTML = '';
+
+  const correctLabel = extractLabel(card.a);
+  const distractorLabels = getDistractorLabels(card, deck);
+
+  const options = shuffle([
+    { label: correctLabel, correct: true },
+    ...distractorLabels.map(l => ({ label: l, correct: false }))
+  ]);
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-option';
+    btn.textContent = opt.label;
+    btn.style.cssText = `
+      width:100%;text-align:left;font-family:var(--sans);font-size:14px;
+      padding:12px 16px;border-radius:12px;border:1px solid var(--border);
+      background:var(--surface);color:var(--text);cursor:pointer;
+      transition:all 0.2s;line-height:1.4;
+    `;
+    btn.onmouseover = () => { if (!btn.dataset.answered) btn.style.borderColor = 'var(--accent)'; };
+    btn.onmouseout = () => { if (!btn.dataset.answered) btn.style.borderColor = 'var(--border)'; };
+    btn.onclick = () => handleMCAnswer(opt.correct, options, btn);
+    container.appendChild(btn);
+  });
+}
+
+function handleMCAnswer(correct, options, clickedBtn) {
+  const allBtns = Array.from(document.querySelectorAll('.mc-option'));
+  allBtns.forEach(b => { b.style.cursor = 'default'; b.onclick = null; b.dataset.answered = '1'; });
+
+  // Mark correct answer green
+  allBtns.forEach((b, i) => {
+    if (options[i].correct) {
+      b.style.background = 'rgba(80,250,123,0.15)';
+      b.style.borderColor = 'var(--green)';
+      b.style.color = 'var(--green)';
+    }
+  });
+
+  // Mark wrong selection red
+  if (!correct) {
+    clickedBtn.style.background = 'rgba(255,85,85,0.15)';
+    clickedBtn.style.borderColor = 'var(--red)';
+    clickedBtn.style.color = 'var(--red)';
+  }
+
+  if (correct) { stats.right++; }
+  else { stats.wrong++; wrongCards.push(deck[idx]); }
+  updateStats();
+
+  setTimeout(() => {
+    idx++;
+    document.getElementById('mcOptions').style.display = 'none';
+    setTimeout(showCard, 120);
+  }, 1400);
+}
+
+function buildDeck() {
+  let pool = ALL_CARDS.filter(c => activeCats.has(c.cat));
+  if (mode === 'wrong') pool = wrongCards.filter(c => activeCats.has(c.cat));
+  if (mode === 'unseen') pool = pool.filter((c,i) => !seenIds.has(ALL_CARDS.indexOf(c)));
+  deck = shuffle([...pool]);
+  idx = 0;
+  stats = { right: 0, wrong: 0 };
+  wrongCards = [];
+  updateStats();
+  showCard();
+  document.getElementById('doneScreen').classList.remove('visible');
+  document.getElementById('cardWrap').style.display = '';
+  document.getElementById('flipRow').style.display = '';
+  document.getElementById('progressBar-wrap') && (document.getElementById('progress-bar-wrap').style.display = '');
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showCard() {
+  if (idx >= deck.length) { showDone(); return; }
+  const c = deck[idx];
+  document.getElementById('cardCat').textContent = c.cat;
+  document.getElementById('cardQ').textContent = c.q;
+  document.getElementById('cardA').innerHTML = c.a;
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('swipeHint').classList.remove('visible');
+  flipped = false;
+  seenIds.add(ALL_CARDS.indexOf(c));
+  updateProgress();
+
+  // re-trigger animation
+  const wrap = document.getElementById('cardWrap');
+  wrap.style.animation = 'none';
+  wrap.offsetHeight;
+  wrap.style.animation = '';
+
+  if (quizType === 'mc') {
+    document.getElementById('cardHint').textContent = '';
+    document.getElementById('cardWrap').style.cursor = 'default';
+    document.getElementById('flipRow').style.display = 'none';
+    document.getElementById('answerRow').classList.remove('visible');
+    document.getElementById('mcOptions').style.display = 'none';
+    // Show MC options after brief pause so card animates in first
+    setTimeout(() => showMCOptions(c), 200);
+  } else {
+    document.getElementById('cardHint').textContent = '↩ Klicken zum Umdrehen';
+    document.getElementById('cardWrap').style.cursor = 'pointer';
+    document.getElementById('flipRow').style.display = 'flex';
+    document.getElementById('answerRow').classList.remove('visible');
+    document.getElementById('mcOptions').style.display = 'none';
+  }
+}
+
+function handleCardClick() {
+  if (quizType === 'karte') flipCard();
+}
+
+function flipCard() {
+  if (!flipped) {
+    document.getElementById('cardInner').classList.add('flipped');
+    document.getElementById('cardHint').textContent = '';
+    flipped = true;
+    document.getElementById('flipRow').style.display = 'none';
+    document.getElementById('answerRow').classList.add('visible');
+    document.getElementById('swipeHint').classList.add('visible');
+  }
+}
+
+function answer(correct) {
+  if (correct) { stats.right++; }
+  else { stats.wrong++; wrongCards.push(deck[idx]); }
+  updateStats();
+  idx++;
+  document.getElementById('answerRow').classList.remove('visible');
+  document.getElementById('flipRow').style.display = 'flex';
+  setTimeout(showCard, 180);
+}
+
+function nextCard() {
+  idx++;
+  document.getElementById('answerRow').classList.remove('visible');
+  document.getElementById('flipRow').style.display = 'flex';
+  setTimeout(showCard, 180);
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = deck.length;
+  document.getElementById('statRight').textContent = stats.right;
+  document.getElementById('statWrong').textContent = stats.wrong;
+}
+
+function updateProgress() {
+  const pct = deck.length ? Math.round((idx / deck.length) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `Karte ${idx + 1} / ${deck.length}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function showDone() {
+  document.getElementById('cardWrap').style.display = 'none';
+  document.getElementById('flipRow').style.display = 'none';
+  document.getElementById('answerRow').classList.remove('visible');
+  const done = document.getElementById('doneScreen');
+  done.classList.add('visible');
+  const pct = deck.length ? Math.round((stats.right / deck.length) * 100) : 0;
+  document.getElementById('scoreRingWrap').innerHTML = `<div class="score-ring" style="--pct:${pct}"><span class="score-num">${pct}%</span></div>`;
+  document.getElementById('doneSub').textContent = `${stats.right} von ${deck.length} richtig · ${stats.wrong} falsch`;
+  updateProgress();
+}
+
+function restart(onlyWrong) {
+  if (onlyWrong) { mode = 'wrong'; document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active', i===1)); }
+  buildDeck();
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['all','wrong','unseen'][i] === m);
+  });
+  buildDeck();
+}
+
+function buildCatButtons() {
+  const row = document.getElementById('catRow');
+  row.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'cat-btn active';
+  allBtn.id = 'cat-all';
+  allBtn.textContent = 'Alle';
+  allBtn.onclick = () => {
+    activeCats = new Set(CATS);
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.id === 'cat-all'));
+    buildDeck();
+  };
+  row.appendChild(allBtn);
+  CATS.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.dataset.cat = cat;
+    btn.textContent = cat;
+    btn.onclick = () => {
+      const isOnlyThis = activeCats.size === 1 && activeCats.has(cat);
+      if (isOnlyThis) {
+        // Deselect back to all
+        activeCats = new Set(CATS);
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.id === 'cat-all'));
+      } else {
+        // Switch to only this category
+        activeCats = new Set([cat]);
+        document.querySelectorAll('.cat-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.cat === cat);
+        });
+        document.getElementById('cat-all').classList.remove('active');
+      }
+      buildDeck();
+    };
+    row.appendChild(btn);
+  });
+}
+
+loadEditsFromStorage();
+buildCatButtons();
+buildDeck();
+
+// ── EDIT / NEW CARD FUNCTIONALITY ──
+let editCardOriginalIndex = -1;
+let isNewCard = false;
+
+function populateCatSelect() {
+  const sel = document.getElementById('editCat');
+  const current = sel.value;
+  sel.innerHTML = '';
+  CATS.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+  const newOpt = document.createElement('option');
+  newOpt.value = '__new__';
+  newOpt.textContent = '+ Neue Kategorie …';
+  sel.appendChild(newOpt);
+  if (current && [...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+function toggleNewCat() {
+  const sel = document.getElementById('editCat');
+  const inp = document.getElementById('editCatNew');
+  inp.style.display = sel.value === '__new__' ? 'block' : 'none';
+  if (sel.value === '__new__') inp.focus();
+}
+
+function openEdit() {
+  if (idx >= deck.length) return;
+  isNewCard = false;
+  const card = deck[idx];
+  editCardOriginalIndex = ALL_CARDS.indexOf(card);
+
+  populateCatSelect();
+  document.getElementById('editCat').value = card.cat;
+  document.getElementById('editCatNew').style.display = 'none';
+  document.getElementById('editModalTitle').textContent = '✎ Karte bearbeiten';
+
+  document.getElementById('editQ').value = card.q;
+  document.getElementById('editA').value = card.a;
+  updateAnswerPreview();
+
+  const mc = card.mc || [];
+  document.getElementById('editMC0').value = mc[0] || '';
+  document.getElementById('editMC1').value = mc[1] || '';
+  document.getElementById('editMC2').value = mc[2] || '';
+
+  document.getElementById('editModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function openNewCard() {
+  isNewCard = true;
+  editCardOriginalIndex = -1;
+
+  populateCatSelect();
+  const defaultCat = deck.length ? deck[Math.min(idx, deck.length - 1)].cat : CATS[0];
+  document.getElementById('editCat').value = defaultCat || CATS[0] || '';
+  document.getElementById('editCatNew').value = '';
+  document.getElementById('editCatNew').style.display = 'none';
+  document.getElementById('editModalTitle').textContent = '＋ Neue Karte';
+
+  document.getElementById('editQ').value = '';
+  document.getElementById('editA').value = '';
+  document.getElementById('editAPreview').innerHTML = '';
+  document.getElementById('editMC0').value = '';
+  document.getElementById('editMC1').value = '';
+  document.getElementById('editMC2').value = '';
+
+  document.getElementById('editModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('editQ').focus(), 50);
+}
+
+function closeEdit() {
+  document.getElementById('editModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function updateAnswerPreview() {
+  document.getElementById('editAPreview').innerHTML = document.getElementById('editA').value;
+}
+
+function getSelectedCat() {
+  const sel = document.getElementById('editCat');
+  if (sel.value === '__new__') return document.getElementById('editCatNew').value.trim();
+  return sel.value;
+}
+
+function saveEdit() {
+  const q = document.getElementById('editQ').value.trim();
+  const a = document.getElementById('editA').value.trim();
+  const cat = getSelectedCat();
+  if (!q || !a || !cat) return;
+
+  const mc0 = document.getElementById('editMC0').value.trim();
+  const mc1 = document.getElementById('editMC1').value.trim();
+  const mc2 = document.getElementById('editMC2').value.trim();
+  const mcArr = [mc0, mc1, mc2].filter(s => s.length > 0);
+
+  if (isNewCard) {
+    const newCard = { cat, q, a };
+    if (mcArr.length > 0) newCard.mc = mcArr;
+    ALL_CARDS.push(newCard);
+    if (!CATS.includes(cat)) CATS.push(cat);
+    activeCats.add(cat);
+    try {
+      const stored = JSON.parse(localStorage.getItem('lernkarten-new-v1') || '[]');
+      stored.push(newCard);
+      localStorage.setItem('lernkarten-new-v1', JSON.stringify(stored));
+    } catch(e) {}
+    closeEdit();
+    rebuildCatButtons();
+    buildDeck();
+  } else {
+    if (editCardOriginalIndex < 0) return;
+    const card = ALL_CARDS[editCardOriginalIndex];
+    const prevCat = card.cat;
+    card.cat = cat;
+    card.q = q;
+    card.a = a;
+    if (mcArr.length > 0) card.mc = mcArr;
+    else delete card.mc;
+    if (!CATS.includes(cat)) { CATS.push(cat); activeCats.add(cat); }
+    try {
+      const stored = JSON.parse(localStorage.getItem('lernkarten-edits-v1') || '{}');
+      stored[editCardOriginalIndex] = { cat: card.cat, q: card.q, a: card.a, mc: card.mc };
+      localStorage.setItem('lernkarten-edits-v1', JSON.stringify(stored));
+    } catch(e) {}
+    closeEdit();
+    if (cat !== prevCat) { rebuildCatButtons(); buildDeck(); } else { showCard(); }
+  }
+}
+
+function rebuildCatButtons() {
+  document.getElementById('catRow').innerHTML = '';
+  buildCatButtons();
+}
+
+function loadEditsFromStorage() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('lernkarten-edits-v1') || '{}');
+    Object.entries(stored).forEach(([i, data]) => {
+      const cardIdx = parseInt(i);
+      if (ALL_CARDS[cardIdx]) {
+        if (data.cat) ALL_CARDS[cardIdx].cat = data.cat;
+        if (data.q) ALL_CARDS[cardIdx].q = data.q;
+        if (data.a) ALL_CARDS[cardIdx].a = data.a;
+        if (data.mc && data.mc.length) ALL_CARDS[cardIdx].mc = data.mc;
+        else delete ALL_CARDS[cardIdx].mc;
+      }
+    });
+  } catch(e) {}
+  try {
+    const newCards = JSON.parse(localStorage.getItem('lernkarten-new-v1') || '[]');
+    newCards.forEach(card => {
+      ALL_CARDS.push(card);
+      if (!CATS.includes(card.cat)) CATS.push(card.cat);
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('editModal').style.display === 'block') closeEdit();
+  if (document.getElementById('importModal').style.display === 'block') closeImport();
+});
+
+// ── IMPORT FUNCTIONALITY ──
+function openImport() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importFeedback').textContent = '';
+  document.getElementById('importSubmitBtn').textContent = 'Importieren';
+  document.getElementById('importModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('importText').focus(), 50);
+}
+
+function closeImport() {
+  document.getElementById('importModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function parseImportedCards(text) {
+  try {
+    // Evaluate as JS array – handles template literals and the exact Claude output format
+    const cards = new Function('return [' + text.trim().replace(/,\s*$/, '') + ']')();
+    if (!Array.isArray(cards)) return null;
+    return cards.filter(c =>
+      c && typeof c === 'object' &&
+      typeof c.cat === 'string' && c.cat.trim() &&
+      typeof c.q   === 'string' && c.q.trim() &&
+      typeof c.a   === 'string' && c.a.trim()
+    );
+  } catch (e) {
+    return null;
+  }
+}
+
+function previewImport() {
+  const text = document.getElementById('importText').value.trim();
+  const fb  = document.getElementById('importFeedback');
+  const btn = document.getElementById('importSubmitBtn');
+
+  if (!text) { fb.textContent = ''; btn.textContent = 'Importieren'; return; }
+
+  const cards = parseImportedCards(text);
+  if (!cards) {
+    fb.style.color = 'var(--red)';
+    fb.textContent = '⚠ Format nicht erkannt – prüfe den Schnipsel';
+    btn.textContent = 'Importieren';
+  } else if (cards.length === 0) {
+    fb.style.color = 'var(--red)';
+    fb.textContent = '⚠ Keine gültigen Karten – cat, q und a werden benötigt';
+    btn.textContent = 'Importieren';
+  } else {
+    const cats = [...new Set(cards.map(c => c.cat))];
+    fb.style.color = 'var(--green)';
+    fb.textContent = `✓ ${cards.length} Karte${cards.length !== 1 ? 'n' : ''} in ${cats.length} Kategorie${cats.length !== 1 ? 'n' : ''} erkannt`;
+    btn.textContent = `${cards.length} Karte${cards.length !== 1 ? 'n' : ''} importieren`;
+  }
+}
+
+function executeImport() {
+  const text  = document.getElementById('importText').value.trim();
+  const cards = parseImportedCards(text);
+  if (!cards || cards.length === 0) return;
+
+  cards.forEach(card => {
+    ALL_CARDS.push(card);
+    if (!CATS.includes(card.cat)) CATS.push(card.cat);
+    activeCats.add(card.cat);
+  });
+
+  try {
+    const stored = JSON.parse(localStorage.getItem('lernkarten-new-v1') || '[]');
+    cards.forEach(c => stored.push(c));
+    localStorage.setItem('lernkarten-new-v1', JSON.stringify(stored));
+  } catch (e) {}
+
+  closeImport();
+  rebuildCatButtons();
+  buildDeck();
+}
+
+// ── EXPORT FUNCTIONALITY ──
+async function exportHTML() {
+  let src;
+  try {
+    const resp = await fetch(window.location.href);
+    if (!resp.ok) throw new Error();
+    src = await resp.text();
+  } catch {
+    // Fallback: serialize current DOM (loses dynamic state, but works offline)
+    const mcEl = document.getElementById('mcOptions');
+    const mcBak = mcEl ? mcEl.innerHTML : '';
+    if (mcEl) mcEl.innerHTML = '';
+    src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    if (mcEl) mcEl.innerHTML = mcBak;
+  }
+  const json = JSON.stringify(ALL_CARDS);
+  const safe = json.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  src = src.replace(
+    /\/\/ @@CARDS_START[\s\S]*?\/\/ @@CARDS_END/,
+    `// @@CARDS_START\nconst ALL_CARDS = JSON.parse(\`${safe}\`);\n// @@CARDS_END`
+  );
+  // In the exported file, edits are already baked in — no need to re-apply from localStorage
+  src = src.replace(/\nloadEditsFromStorage\(\);\n/, '\n');
+  const blob = new Blob([src], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lernkarten_export.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ── SWIPE GESTURES ──
+(function () {
+  let x0 = 0, y0 = 0, t0 = 0;
+  const wrap = document.getElementById('cardWrap');
+
+  wrap.addEventListener('touchstart', e => {
+    x0 = e.touches[0].clientX;
+    y0 = e.touches[0].clientY;
+    t0 = Date.now();
+  }, { passive: true });
+
+  wrap.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+    // Small movement = tap → let onclick handle it
+    if (absDx < 15 && absDy < 15) return;
+    // Too slow or not enough distance
+    if (Date.now() - t0 > 600 || (absDx < 35 && absDy < 35)) return;
+
+    e.preventDefault(); // prevent ghost click
+
+    if (quizType !== 'karte') return;
+
+    if (!flipped) {
+      // Swipe up → flip card
+      if (absDy > absDx && dy < -35) flipCard();
+    } else {
+      // Horizontal swipe → answer
+      if (absDx > absDy && absDx > 50) {
+        if (navigator.vibrate) navigator.vibrate(dx > 0 ? 30 : [25, 15, 25]);
+        answer(dx > 0); // right = richtig, left = falsch
+      }
+    }
+  }, { passive: false });
+})();
+
+// ── PWA: Service Worker für Offline-Betrieb ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+// ── PWA: Install-Banner ──
+let deferredPrompt = null;
+const installBanner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+const dismissBtn = document.getElementById('dismissBtn');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBanner) installBanner.style.display = 'flex';
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (installBanner) installBanner.style.display = 'none';
+  });
+}
+if (dismissBtn) {
+  dismissBtn.addEventListener('click', () => {
+    if (installBanner) installBanner.style.display = 'none';
+  });
+}
+</script>
+
+<!-- Install Banner -->
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2e2e2e;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;z-index:999;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:22px">📱</span>
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#f0f0f0">Als App installieren</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:11px;color:#666">Offline nutzbar, Icon auf dem Homescreen</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button id="dismissBtn" style="font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid #2e2e2e;background:transparent;color:#666;cursor:pointer">Nicht jetzt</button>
+    <button id="installBtn" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:none;background:#c8f135;color:#000;cursor:pointer">Installieren</button>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div id="importModal" onclick="if(event.target===this)closeImport()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2000;overflow-y:auto;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));">
+  <div style="max-width:680px;margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+      <span style="font-family:var(--mono);font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;">⬇ Karten importieren</span>
+      <button onclick="closeImport()" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;">×</button>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;">
+      Füge einen oder mehrere Karten-Schnipsel aus dem Claude Chat ein. Du kannst Claude bitten:<br>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--accent);display:block;margin-top:6px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);">„Erstelle Lernkarten zum Thema X als Code-Schnipsel im Format: { cat, mc, q, a }"</span>
+    </p>
+
+    <label class="edit-label">Code-Schnipsel einfügen</label>
+    <textarea id="importText" class="edit-input" rows="12"
+      placeholder='{ cat: "Kategorie", mc: ["Falsch 1","Falsch 2","Falsch 3"], q: "Frage?", a: `<ul><li>Antwort</li></ul>` },
+{ cat: "Kategorie", q: "Zweite Frage?", a: `<ul><li>Antwort</li></ul>` }'
+      oninput="previewImport()"></textarea>
+
+    <div id="importFeedback" style="font-family:var(--mono);font-size:12px;min-height:20px;margin-top:-0.4rem;margin-bottom:1rem;"></div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeImport()" style="font-family:var(--sans);font-size:14px;font-weight:500;padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Abbrechen</button>
+      <button onclick="executeImport()" id="importSubmitBtn" style="font-family:var(--sans);font-size:14px;font-weight:600;padding:11px 22px;border-radius:10px;border:none;background:var(--accent);color:#000;cursor:pointer;">Importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" onclick="if(event.target===this)closeEdit()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2000;overflow-y:auto;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));">
+  <div style="max-width:680px;margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+      <span id="editModalTitle" style="font-family:var(--mono);font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;">✎ Karte bearbeiten</span>
+      <button onclick="closeEdit()" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;">×</button>
+    </div>
+
+    <label class="edit-label">Kategorie</label>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;">
+      <select id="editCat" class="edit-input" style="margin-bottom:0;cursor:pointer;flex:1;" onchange="toggleNewCat()"></select>
+      <input id="editCatNew" class="edit-input" type="text" placeholder="Name der neuen Kategorie ..." style="margin-bottom:0;display:none;flex:1;">
+    </div>
+
+    <label class="edit-label">Frage</label>
+    <textarea id="editQ" class="edit-input" rows="3" placeholder="Frage eingeben..."></textarea>
+
+    <label class="edit-label">Antwort (HTML)</label>
+    <textarea id="editA" class="edit-input" rows="8" placeholder="Antwort als HTML ..." oninput="updateAnswerPreview()"></textarea>
+
+    <label class="edit-label">Vorschau</label>
+    <div id="editAPreview" class="edit-preview"></div>
+
+    <div style="font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:1.2rem 0 0.4rem;padding-top:1rem;border-top:1px solid var(--border);">
+      Multiple Choice – Falsche Antworten
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:0.8rem;">Die richtige Antwort wird aus dem Antwort-Feld oben automatisch erzeugt.</p>
+    <label class="edit-label">Option 1 (falsch)</label>
+    <input id="editMC0" class="edit-input" type="text" placeholder="Falsche Antwort 1 ...">
+    <label class="edit-label">Option 2 (falsch)</label>
+    <input id="editMC1" class="edit-input" type="text" placeholder="Falsche Antwort 2 ...">
+    <label class="edit-label">Option 3 (falsch)</label>
+    <input id="editMC2" class="edit-input" type="text" placeholder="Falsche Antwort 3 ...">
+
+    <div style="display:flex;gap:10px;margin-top:1.5rem;justify-content:flex-end;">
+      <button onclick="closeEdit()" style="font-family:var(--sans);font-size:14px;font-weight:500;padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">Abbrechen</button>
+      <button onclick="saveEdit()" style="font-family:var(--sans);font-size:14px;font-weight:600;padding:11px 22px;border-radius:10px;border:none;background:var(--accent);color:#000;cursor:pointer;">Speichern</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
